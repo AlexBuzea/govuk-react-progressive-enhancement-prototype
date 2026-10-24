@@ -1,6 +1,5 @@
 node_modules/
-public/client.js
-public/client.js.map
+public/islands/
 dist/
 .DS_Store
 *.log

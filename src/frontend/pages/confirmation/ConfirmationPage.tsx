@@ -1,6 +1,9 @@
+import { SERVICE_NAME } from "../../../shared/types";
+
 export function ConfirmationPage() {
   return (
     <>
+      <title>{`Application submitted — ${SERVICE_NAME} — GOV.UK`}</title>
       <div className="govuk-panel govuk-panel--confirmation">
         <h1 className="govuk-panel__title">Application complete</h1>
         <div className="govuk-panel__body">

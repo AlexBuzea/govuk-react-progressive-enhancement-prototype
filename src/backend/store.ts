@@ -1,26 +1,28 @@
-import type { ApplicationData, AppData } from "../shared/types";
+import type { ApplicationData, CustomiseData } from "../shared/types";
 
-// Simple in-memory data (lost when the server restarts)
+/**
+ * In-memory "database" for the prototype.
+ *
+ * One copy, shared by every visitor, reset when the server restarts.
+ * A real service would keep this per user (session or database) — the
+ * routes would not need to change, only where the data comes from.
+ */
 
-let application: ApplicationData = {
+export const emptyApplication: ApplicationData = {
   fullName: "",
   vehicleReg: "",
   permitType: "",
 };
 
-let counter = 0;
+export const emptyCustomise: CustomiseData = {
+  duration: "",
+  visitorBay: "",
+  visitorEndDate: "",
+  zoneId: "",
+};
 
 export const store = {
-  getAppData(): AppData {
-    return { application, counter };
-  },
-
-  saveApplication(data: ApplicationData): void {
-    application = { ...data };
-  },
-
-  incrementCounter(): number {
-    counter += 1;
-    return counter;
-  },
+  application: emptyApplication,
+  customise: emptyCustomise,
+  counter: 0,
 };

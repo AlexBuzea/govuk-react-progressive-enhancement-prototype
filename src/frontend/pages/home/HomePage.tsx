@@ -1,6 +1,10 @@
+import { SERVICE_NAME } from "../../../shared/types";
+
+/** Start page — plain server-rendered HTML, no island needed. */
 export function HomePage() {
   return (
     <>
+      <title>{`${SERVICE_NAME} — GOV.UK`}</title>
       <h1 className="govuk-heading-xl">Apply for a parking permit</h1>
       <p className="govuk-body-l">
         Use this service to apply for a residential or visitor parking permit in
@@ -12,7 +16,7 @@ export function HomePage() {
       <ul className="govuk-list govuk-list--bullet">
         <li>your full name</li>
         <li>the vehicle registration number</li>
-        <li>to choose a permit type</li>
+        <li>to choose a permit type and options</li>
       </ul>
 
       <p className="govuk-body">It takes about 5 minutes to apply.</p>

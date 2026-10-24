@@ -1,26 +1,32 @@
-import type { ApplicationData } from "../../../shared/types";
+import { SERVICE_NAME, type ApplicationData, type CustomiseData } from "../../../shared/types";
 import { BackLink } from "../../components/BackLink";
 import { Button } from "../../components/Button";
-import { Counter } from "./Counter";
+import { SummaryRow } from "../../components/SummaryRow";
+import { PERMIT_TYPES } from "../apply/ApplyPage";
+import {
+  calculatePrice,
+  DURATIONS,
+  findZone,
+  formatPrice,
+  YES_NO,
+} from "../customise/options";
 
 type CheckPageProps = {
   application: ApplicationData;
-  counter: number;
+  customise: CustomiseData;
 };
 
-function permitLabel(permitType: string): string {
-  if (permitType === "resident") return "Resident permit";
-  if (permitType === "visitor") return "Visitor permit";
-  return "Not provided";
-}
+/** "Check your answers" — plain server-rendered HTML, no island needed. */
+export function CheckPage({ application, customise }: CheckPageProps) {
+  const zone = findZone(customise.zoneId);
+  const price = calculatePrice(customise.duration, customise.visitorBay);
 
-export function CheckPage({ application, counter }: CheckPageProps) {
-  const hasAnswers =
-    application.fullName || application.vehicleReg || application.permitType;
+  const hasAnswers = application.fullName || application.vehicleReg || customise.duration;
 
   return (
     <>
-      <BackLink href="/apply" />
+      <title>{`Check your answers — ${SERVICE_NAME} — GOV.UK`}</title>
+      <BackLink href="/customise" />
       <h1 className="govuk-heading-l">Check your answers</h1>
 
       {!hasAnswers ? (
@@ -34,47 +40,48 @@ export function CheckPage({ application, counter }: CheckPageProps) {
       ) : (
         <>
           <dl className="govuk-summary-list">
-            <div className="govuk-summary-list__row">
-              <dt className="govuk-summary-list__key">Full name</dt>
-              <dd className="govuk-summary-list__value">
-                {application.fullName || "Not provided"}
-              </dd>
-              <dd className="govuk-summary-list__actions">
-                <a className="govuk-link" href="/apply">
-                  Change
-                  <span className="govuk-visually-hidden"> full name</span>
-                </a>
-              </dd>
-            </div>
-
-            <div className="govuk-summary-list__row">
-              <dt className="govuk-summary-list__key">Vehicle registration</dt>
-              <dd className="govuk-summary-list__value">
-                {application.vehicleReg || "Not provided"}
-              </dd>
-              <dd className="govuk-summary-list__actions">
-                <a className="govuk-link" href="/apply">
-                  Change
-                  <span className="govuk-visually-hidden">
-                    {" "}
-                    vehicle registration
-                  </span>
-                </a>
-              </dd>
-            </div>
-
-            <div className="govuk-summary-list__row">
-              <dt className="govuk-summary-list__key">Permit type</dt>
-              <dd className="govuk-summary-list__value">
-                {permitLabel(application.permitType)}
-              </dd>
-              <dd className="govuk-summary-list__actions">
-                <a className="govuk-link" href="/apply">
-                  Change
-                  <span className="govuk-visually-hidden"> permit type</span>
-                </a>
-              </dd>
-            </div>
+            <SummaryRow
+              label="Full name"
+              value={application.fullName || "Not provided"}
+              changeHref="/apply"
+            />
+            <SummaryRow
+              label="Vehicle registration"
+              value={application.vehicleReg || "Not provided"}
+              changeHref="/apply"
+            />
+            <SummaryRow
+              label="Permit type"
+              value={labelFor(PERMIT_TYPES, application.permitType)}
+              changeHref="/apply"
+            />
+            <SummaryRow
+              label="Duration"
+              value={labelFor(DURATIONS, customise.duration)}
+              changeHref="/customise"
+            />
+            <SummaryRow
+              label="Visitor bay"
+              value={labelFor(YES_NO, customise.visitorBay)}
+              changeHref="/customise"
+            />
+            {customise.visitorBay === "yes" ? (
+              <SummaryRow
+                label="Visitor end date"
+                value={customise.visitorEndDate || "Not provided"}
+                changeHref="/customise"
+              />
+            ) : null}
+            <SummaryRow
+              label="Parking zone"
+              value={zone ? `${zone.name} (${zone.id}) — ${zone.area}` : "Not provided"}
+              changeHref="/customise"
+            />
+            <SummaryRow
+              label="Estimated total"
+              value={price == null ? "Not provided" : formatPrice(price)}
+              changeHref="/customise"
+            />
           </dl>
 
           <form method="post" action="/submit">
@@ -82,27 +89,13 @@ export function CheckPage({ application, counter }: CheckPageProps) {
           </form>
         </>
       )}
-
-      <hr className="govuk-section-break govuk-section-break--l govuk-section-break--visible" />
-
-      {/*
-        Island = interactive browser React attached to existing server HTML
-        (not a full client page).
-
-        - Server already rendered this HTML
-        - If JS is on, client.tsx hydrates #counter-root so clicks update instantly
-        - If JS is off, the <form> still POSTs to the server
-
-        >>> To add another island on a page, copy this pattern, e.g.:
-        <div id="date-picker-root" data-initial-value={value}>
-          <DatePicker initialValue={value} />
-        </div>
-        Then hydrate that id in frontend/client.tsx, and load /client.js
-        for that page in backend/ssr.tsx (loadClientJs).
-      */}
-      <div id="counter-root" data-initial-count={counter}>
-        <Counter initialCount={counter} />
-      </div>
     </>
   );
+}
+
+function labelFor(
+  options: readonly { value: string; label: string }[],
+  value: string
+): string {
+  return options.find((option) => option.value === value)?.label ?? "Not provided";
 }
