@@ -1,8 +1,10 @@
+import { detailsPageFor } from "../../../shared/journey";
 import {
   SERVICE_NAME,
   type ApplicationData,
   type CustomiseData,
   type DetailsData,
+  type OrganisationData,
 } from "../../../shared/types";
 import { BackLink } from "../../components/BackLink";
 import { Button } from "../../components/Button";
@@ -19,18 +21,28 @@ import {
 type CheckPageProps = {
   application: ApplicationData;
   details: DetailsData;
+  organisation: OrganisationData;
   customise: CustomiseData;
 };
 
 /** "Check your answers" — plain server-rendered HTML, no island needed. */
-export function CheckPage({ application, details, customise }: CheckPageProps) {
+export function CheckPage({ application, details, organisation, customise }: CheckPageProps) {
   const zone = findZone(customise.zoneId);
   const price = calculatePrice(customise.duration, customise.visitorBay);
   const address = [details.addressLine1, details.addressLine2, details.town, details.postcode]
     .filter(Boolean)
     .join(", ");
 
-  const hasAnswers = application.vehicleReg || details.fullName || customise.duration;
+  // Commercial permits show organisation answers; everyone else shows name and address.
+  // Answers for the other kind stay in the store but are not shown.
+  const isCommercial = application.permitType === "commercial";
+  const detailsHref = detailsPageFor(application.permitType);
+
+  const hasAnswers =
+    application.vehicleReg ||
+    details.fullName ||
+    organisation.organisationName ||
+    customise.duration;
 
   return (
     <>
@@ -59,16 +71,38 @@ export function CheckPage({ application, details, customise }: CheckPageProps) {
               value={labelFor(PERMIT_TYPES, application.permitType)}
               changeHref="/apply"
             />
-            <SummaryRow
-              label="Full name"
-              value={details.fullName || "Not provided"}
-              changeHref="/details"
-            />
-            <SummaryRow
-              label="Address"
-              value={address || "Not provided"}
-              changeHref="/details"
-            />
+            {isCommercial ? (
+              <>
+                <SummaryRow
+                  label="Organisation name"
+                  value={organisation.organisationName || "Not provided"}
+                  changeHref={detailsHref}
+                />
+                <SummaryRow
+                  label="Company number"
+                  value={organisation.companyNumber || "Not provided"}
+                  changeHref={detailsHref}
+                />
+                <SummaryRow
+                  label="Contact email"
+                  value={organisation.contactEmail || "Not provided"}
+                  changeHref={detailsHref}
+                />
+              </>
+            ) : (
+              <>
+                <SummaryRow
+                  label="Full name"
+                  value={details.fullName || "Not provided"}
+                  changeHref={detailsHref}
+                />
+                <SummaryRow
+                  label="Address"
+                  value={address || "Not provided"}
+                  changeHref={detailsHref}
+                />
+              </>
+            )}
             <SummaryRow
               label="Duration"
               value={labelFor(DURATIONS, customise.duration)}

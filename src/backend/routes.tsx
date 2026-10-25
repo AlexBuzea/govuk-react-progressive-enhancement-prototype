@@ -1,6 +1,8 @@
 import { Router } from "express";
 import { hasErrors, validateCustomise } from "../frontend/pages/customise/options";
 import { validateDetails } from "../frontend/pages/details/validation";
+import { validateOrganisation } from "../frontend/pages/organisation-details/validation";
+import { detailsPageFor } from "../shared/journey";
 import type { CustomiseData, PageData } from "../shared/types";
 import { renderApp } from "./ssr";
 import { emptyCustomise, store } from "./store";
@@ -11,6 +13,7 @@ import { emptyCustomise, store } from "./store";
  * The page list (which URL shows which component) is frontend/App.tsx:
  *
  *   /  →  /apply  →  /details  →  /customise  →  /check  →  /confirmation
+ *                    (commercial permits: /organisation-details instead of /details)
  *
  * POST handlers live here because a form must work with JavaScript off.
  * Each one saves data and redirects to the next page in that list.
@@ -30,6 +33,8 @@ function pageData(overrides: Partial<PageData> = {}): PageData {
     application: store.application,
     details: store.details,
     detailsErrors: {},
+    organisation: store.organisation,
+    organisationErrors: {},
     customise: store.customise,
     customiseErrors: {},
     counter: store.counter,
@@ -60,7 +65,8 @@ routes.post("/apply", (req, res) => {
     vehicleReg: text(req.body.vehicleReg).toUpperCase(),
     permitType: text(req.body.permitType),
   };
-  res.redirect(303, "/details");
+  // The permit type decides which details page comes next
+  res.redirect(303, detailsPageFor(store.application.permitType));
 });
 
 // Counter island. One route serves both cases:
@@ -93,6 +99,29 @@ routes.post("/details", (req, res) => {
   if (Object.keys(errors).length > 0) {
     // Show the form again with error messages, keeping what the user typed
     renderApp("/details", pageData({ details, detailsErrors: errors }), res);
+    return;
+  }
+  res.redirect(303, "/customise");
+});
+
+// ───────────────────────────── Organisation (commercial) ─────────────────────────────
+
+// Same pattern as /details, for commercial permits.
+routes.post("/organisation-details", (req, res) => {
+  const organisation = {
+    organisationName: text(req.body.organisationName),
+    companyNumber: text(req.body.companyNumber).toUpperCase(),
+    contactEmail: text(req.body.contactEmail),
+  };
+  const errors = validateOrganisation(organisation);
+  store.organisation = organisation;
+
+  if (Object.keys(errors).length > 0) {
+    renderApp(
+      "/organisation-details",
+      pageData({ organisation, organisationErrors: errors }),
+      res
+    );
     return;
   }
   res.redirect(303, "/customise");

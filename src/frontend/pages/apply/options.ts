@@ -2,4 +2,5 @@
 export const PERMIT_TYPES = [
   { value: "resident", label: "Resident permit" },
   { value: "visitor", label: "Visitor permit" },
+  { value: "commercial", label: "Commercial permit" },
 ];

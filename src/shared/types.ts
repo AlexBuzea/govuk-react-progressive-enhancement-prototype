@@ -24,6 +24,16 @@ export type DetailsData = {
 /** One error message per invalid field. An empty object means "all valid". */
 export type DetailsErrors = Partial<Record<keyof DetailsData, string>>;
 
+/** Answers from the /organisation-details form (commercial permits). */
+export type OrganisationData = {
+  organisationName: string;
+  companyNumber: string;
+  contactEmail: string;
+};
+
+/** One error message per invalid field. An empty object means "all valid". */
+export type OrganisationErrors = Partial<Record<keyof OrganisationData, string>>;
+
 /** Answers from the /customise form. Prices are calculated, not stored. */
 export type CustomiseData = {
   duration: string;
@@ -40,6 +50,8 @@ export type PageData = {
   application: ApplicationData;
   details: DetailsData;
   detailsErrors: DetailsErrors;
+  organisation: OrganisationData;
+  organisationErrors: OrganisationErrors;
   customise: CustomiseData;
   customiseErrors: CustomiseErrors;
   counter: number;

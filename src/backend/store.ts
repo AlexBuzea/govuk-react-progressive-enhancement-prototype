@@ -1,4 +1,9 @@
-import type { ApplicationData, CustomiseData, DetailsData } from "../shared/types";
+import type {
+  ApplicationData,
+  CustomiseData,
+  DetailsData,
+  OrganisationData,
+} from "../shared/types";
 
 /**
  * In-memory "database" for the prototype.
@@ -21,6 +26,12 @@ export const emptyDetails: DetailsData = {
   postcode: "",
 };
 
+export const emptyOrganisation: OrganisationData = {
+  organisationName: "",
+  companyNumber: "",
+  contactEmail: "",
+};
+
 export const emptyCustomise: CustomiseData = {
   duration: "",
   visitorBay: "",
@@ -31,6 +42,7 @@ export const emptyCustomise: CustomiseData = {
 export const store = {
   application: emptyApplication,
   details: emptyDetails,
+  organisation: emptyOrganisation,
   customise: emptyCustomise,
   counter: 0,
 };

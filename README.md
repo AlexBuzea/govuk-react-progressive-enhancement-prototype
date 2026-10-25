@@ -38,6 +38,27 @@ Forms are plain HTML forms. They POST to Express, which saves the data and redir
 
 Pages in visit order: `/` → `/apply` → `/details` → `/customise` → `/check` → `/confirmation`
 
+### Conditional routing
+
+The next page can depend on what the user answered. Example: a commercial permit goes to `/organisation-details` instead of `/details`.
+
+The rule is one plain function, `detailsPageFor()` in `shared/journey.ts`:
+
+```ts
+detailsPageFor("commercial") // "/organisation-details"
+detailsPageFor("resident")   // "/details"
+```
+
+It is used in three places, so the rule is written once:
+
+| Where | What it decides |
+|---|---|
+| `POST /apply` in `backend/routes.tsx` | Where to redirect next |
+| Back link on `/customise` | Where "Back" goes |
+| "Change" links on `/check` | Which page to edit |
+
+Back links and Change links need no special support: pass the answer to the page as a prop and call the same function. To add another branch, change that one function.
+
 ### Server-only pages (most pages)
 
 Most pages need no JavaScript at all. React is only used to write the HTML on the server, the same way a template engine would be. These pages have no island and no `<script>` tag.
@@ -95,6 +116,7 @@ src/
     pages/          One folder per page (page component, plus any island and options)
   shared/
     types.ts        Data shapes and SERVICE_NAME, used by backend and frontend
+    journey.ts      Which page comes next when it depends on an answer
 ```
 
 ### Where to look
