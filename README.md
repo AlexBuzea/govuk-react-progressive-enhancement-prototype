@@ -1,8 +1,10 @@
 # Apply for a parking permit — React SSR prototype
 
-A GOV.UK-style service built with Node/Express, TypeScript, and React. No meta-framework (no Next.js).
+A GOV.UK-style service built with Node, Express, TypeScript and React. No meta-framework (no Next.js).
 
-It shows one idea: **every page is a working HTML page first, and React makes parts of it better when JavaScript is available.**
+The idea: **every page is a working HTML page first, and React makes parts of it better when JavaScript is available.**
+
+> Prototype only. Data lives in memory (`backend/store.ts`) and is shared by all visitors until the server restarts.
 
 ## Quick start
 
@@ -11,46 +13,50 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). Try it with JavaScript turned off in DevTools as well.
+Open [http://localhost:3000](http://localhost:3000). Try it with JavaScript turned off in DevTools too.
+
+| Command | What it does |
+|---|---|
+| `npm run dev` | Rebuilds island scripts and restarts the server on change |
+| `npm start` | Builds island scripts once, then starts the server |
+| `npm run typecheck` | Type checks the whole project |
 
 ---
 
-## How the app works
+## How it works
 
 ```
 Browser requests /apply
   → Express (backend/routes.tsx) reads data from the store
-  → renderApp() streams HTML with renderToPipeableStream (backend/ssr.tsx)
+  → renderApp() streams HTML (backend/ssr.tsx)
   → React Router (frontend/App.tsx) picks <ApplyPage /> from the URL
-  → Browser shows the HTML      ← works here, with or without JS
-  → If the page includes a <script> for an island, that JS loads and
-    hydrateRoot makes that part interactive
+  → Browser shows the HTML          ← works with or without JS
+  → If the page has an island <script>, it loads and makes that part interactive
 ```
 
-Forms are plain HTML forms. They POST to Express, which saves the data and redirects. React never needs to be running for the service to work.
+Forms are plain HTML forms. They POST to Express, which saves the data and redirects to the next page. The service works without React running in the browser.
 
-### What is an island?
+### Islands
 
-An island is a React component that is rendered to HTML on the server (so it is visible immediately) and then **also** hydrated in the browser so it becomes interactive. Only the JavaScript for that island is sent. Pages with no island send no JavaScript at all.
+An island is a React component that is rendered to HTML on the server (visible immediately) and then **hydrated** in the browser so it becomes interactive. Only the JavaScript for that island is sent; pages without an island send no JavaScript.
 
-| Where | What | Example |
+| Part | Where | Example |
 |---|---|---|
-| Server (in a page) | Island markup + `<script src="/islands/….js">` | `pages/apply/ApplyPage.tsx` |
-| Browser (entry file) | `hydrateRoot(root, <Component {...props} />)` | `islands/counter.tsx` |
+| Island markup and `<script>` tag | In the page component | `pages/apply/ApplyPage.tsx` |
+| Browser entry (`hydrateRoot`) | `frontend/islands/` | `islands/counter.tsx` |
 
-### The two islands in this prototype
+There are two islands:
 
-**Counter on `/apply`** — smallest example: without JS the form POSTs (server waits 1.5 s); with JS the number updates instantly.
-
-**Permit options on `/customise`** — whole form as an island:
+- **Counter on `/apply`** — the smallest example. Both save the count through the same `POST /apply/increment`. Without JS the page reloads on every click; with JS the number updates instantly and the request is sent in the background. It is a teaching toy; the permit options form below is the realistic example.
+- **Permit options on `/customise`** — the whole form is an island:
 
 | Feature | JS off (server) | JS on (React) |
 |---|---|---|
-| Validation | POST re-renders with errors | Checked before submit |
-| Price | Shown on check page | Updates as you choose |
+| Validation | POST re-renders the form with errors | Checked before submit |
+| Price | Shown on the check page | Updates as you choose |
 | Zone search | "Filter zones" reloads the page | Filters as you type |
 
-Form choices and rules live in `pages/customise/options.ts` and run on **both** the server and the island, so they cannot drift apart.
+Choices and rules live in `pages/customise/options.ts` and run on **both** the server and the island, so they cannot drift apart.
 
 ---
 
@@ -59,42 +65,39 @@ Form choices and rules live in `pages/customise/options.ts` and run on **both** 
 ```
 src/
   backend/
-    app.ts          # Express setup and static files
-    routes.tsx      # Form POSTs, then one GET that renders the app
-    ssr.tsx         # renderApp() → renderToPipeableStream
-    store.ts        # In-memory data (prototype only)
+    app.ts          Express setup and static files
+    routes.tsx      Form POSTs, then one GET that renders any page
+    ssr.tsx         renderApp(): React → streamed HTML
+    store.ts        In-memory data (prototype only)
   frontend/
-    App.tsx         # URL → page component
-    Document.tsx    # <html> shell and layout. Pages supply their own <title>
-    islands/        # Browser entry points — one file per island
-    pages/          # One folder per page
-      apply/        # ApplyPage (+ PERMIT_TYPES), Counter
-      customise/    # CustomisePage, CustomiseForm, options.ts
-      check/        # CheckPage
-      …
-    components/     # GOV.UK UI pieces
-    layout/         # Header, footer, width container
+    App.tsx         URL → page component
+    Document.tsx    <html> shell: head, header, footer, current page
+    components/     GOV.UK UI pieces (Button, TextInput, Radios…)
+    islands/        Browser entry points, one file per island
+    pages/          One folder per page (page component, plus any island and options)
   shared/
-    types.ts        # Data shapes + SERVICE_NAME (store, Express, React)
+    types.ts        Data shapes and SERVICE_NAME, used by backend and frontend
 ```
 
-### Where to look for what
+### Where to look
 
 | Question | File |
 |---|---|
 | Which URL shows which page? | `frontend/App.tsx` |
+| Page header, footer, stylesheets? | `frontend/Document.tsx` |
 | Browser tab title? | `<title>` at the top of the page component |
-| Form POST handlers? | `backend/routes.tsx` |
-| Customise validation / price / zones? | `pages/customise/options.ts` |
+| What happens on form submit? | `backend/routes.tsx` |
+| Customise validation, price, zones? | `pages/customise/options.ts` |
 | How does an island hydrate? | `frontend/islands/counter.tsx` |
-| How is HTML streamed? | `backend/ssr.tsx` (`renderToPipeableStream`) |
 | How are island scripts built? | `vite.config.ts` |
+
+Search for `>>>` in the code to find where each kind of addition goes.
 
 ---
 
-## How to add a new page
+## How to add a page
 
-1. Create `src/frontend/pages/<name>/<Name>Page.tsx`. Put the browser tab title on the page:
+1. Create `src/frontend/pages/<name>/<Name>Page.tsx`. Each page sets its own tab title with a `<title>` (React 19 moves it into `<head>`):
 
 ```tsx
 import { SERVICE_NAME } from "../../../shared/types";
@@ -109,21 +112,25 @@ export function MyPage() {
 }
 ```
 
-React 19 moves that `<title>` into `<head>` while rendering.
+2. In `App.tsx`, add a `<Route>` for it.
+3. If it has a form, add a POST in `backend/routes.tsx` that saves the data and redirects.
 
-2. In `App.tsx`, add a `<Route>`.
-3. If it has a form, add a POST in `backend/routes.tsx`.
-
-No new GET in Express — one catch-all renders every page.
+You do not add a GET in Express: one catch-all renders every page.
 
 ## How to add an island
 
-1. Build a normal component (props must be JSON-serialisable).
-2. On the page, render the island and its script:
+The component runs twice: the server renders it to HTML, then the browser script runs it again on top of that HTML so it becomes interactive. Both runs need the same props, so the server passes them to the browser as text.
+
+1. Build a normal component. Its props travel as text, so use only strings, numbers, booleans, arrays and plain objects (no functions or dates).
+2. In the page, create the props once and use them in both places:
 
 ```tsx
-<div id="my-island" data-props={JSON.stringify({ initialCount: 0 })}>
-  <MyComponent initialCount={0} />
+const props = { initialCount: 0 };
+
+{/* 1. Browser: the island script reads these props from data-props */}
+<div id="my-island" data-props={JSON.stringify(props)}>
+  {/* 2. Server: renders the component to HTML using the same props */}
+  <MyComponent {...props} />
 </div>
 <script type="module" src="/islands/my-island.js" />
 ```
@@ -136,13 +143,11 @@ import { MyComponent } from "../pages/.../MyComponent";
 
 const root = document.getElementById("my-island");
 if (root) {
-  const props = JSON.parse(root.dataset.props ?? "{}");
-  hydrateRoot(root, <MyComponent {...props} />);
+  const props = JSON.parse(root.dataset.props ?? "{}"); // text back into an object
+  hydrateRoot(root, <MyComponent {...props} />); // attach React to the server's HTML
 }
 ```
 
-Vite builds `public/islands/my-island.js` automatically.
+Vite builds it to `public/islands/my-island.js` automatically; no config change needed.
 
 Keep the no-JS path working: the form should still POST to a server route that does the same job.
-
-> Look for `>>>` comments — they mark where the next piece goes.

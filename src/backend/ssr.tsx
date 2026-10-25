@@ -11,8 +11,8 @@ import type { PageData } from "../shared/types";
  * <Routes> in frontend/App.tsx picks the page. Express does not list
  * a GET for every page — one catch-all calls this function.
  *
- * renderToPipeableStream is React 18's standard SSR API: the browser starts
- * receiving HTML as soon as the page shell is ready. The result is still a
+ * renderToPipeableStream is React's standard server rendering API: the browser
+ * starts receiving HTML as soon as the page shell is ready. The result is a
  * complete HTML page, so forms work with or without JavaScript.
  */
 export function renderApp(url: string, data: PageData, res: Response): void {
@@ -26,7 +26,7 @@ export function renderApp(url: string, data: PageData, res: Response): void {
       onShellReady() {
         res.statusCode = didError ? 500 : 200;
         res.setHeader("Content-Type", "text/html; charset=utf-8");
-        // React inserts <!DOCTYPE html> itself because the root is <html>
+        // React adds <!DOCTYPE html> itself because the root element is <html>
         pipe(res);
       },
       onShellError(error) {

@@ -2,7 +2,7 @@ import { SERVICE_NAME, type ApplicationData, type CustomiseData } from "../../..
 import { BackLink } from "../../components/BackLink";
 import { Button } from "../../components/Button";
 import { SummaryRow } from "../../components/SummaryRow";
-import { PERMIT_TYPES } from "../apply/ApplyPage";
+import { PERMIT_TYPES } from "../apply/options";
 import {
   calculatePrice,
   DURATIONS,

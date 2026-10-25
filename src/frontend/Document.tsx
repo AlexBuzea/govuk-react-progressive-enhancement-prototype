@@ -1,8 +1,11 @@
 import { Outlet } from "react-router-dom";
-import { Layout } from "./layout/Layout";
+import { SERVICE_NAME } from "../shared/types";
+import { Footer } from "./components/Footer";
+import { Header } from "./components/Header";
 
 /**
- * The <html> shell: head, stylesheets, header/footer, and the current page.
+ * The <html> shell shared by every page: head, stylesheets, header, footer,
+ * and the current page (<Outlet />).
  *
  * The browser tab title is a <title> on each page. React 19 hoists it into
  * this <head> while rendering. Island <script> tags live on the pages that
@@ -30,11 +33,23 @@ export function Document() {
           }}
         />
 
-        <div id="root">
-          <Layout>
-            <Outlet />
-          </Layout>
+        <a href="#main-content" className="govuk-skip-link">
+          Skip to main content
+        </a>
+
+        <Header serviceName={SERVICE_NAME} />
+
+        <div className="govuk-width-container">
+          <main className="govuk-main-wrapper" id="main-content" role="main">
+            <div className="govuk-grid-row">
+              <div className="govuk-grid-column-two-thirds">
+                <Outlet />
+              </div>
+            </div>
+          </main>
         </div>
+
+        <Footer />
       </body>
     </html>
   );

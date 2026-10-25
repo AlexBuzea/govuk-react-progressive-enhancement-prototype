@@ -11,7 +11,7 @@ const govukDir = path.join(__dirname, "../../node_modules/govuk-frontend/dist/go
 export function createApp() {
   const app = express();
 
-  // Parse HTML form submissions (application/x-www-form-urlencoded)
+  // Parse HTML form submissions (application/x-www-form-urlencoded) into req.body
   app.use(express.urlencoded({ extended: false }));
 
   // GOV.UK Frontend CSS, fonts and images (the CSS expects them under /assets)
@@ -23,6 +23,7 @@ export function createApp() {
   // Our own files: styles.css and the island scripts Vite builds into public/islands/
   app.use(express.static(publicDir));
 
+  // Pages and form handlers (must come after static files)
   app.use(routes);
 
   return app;

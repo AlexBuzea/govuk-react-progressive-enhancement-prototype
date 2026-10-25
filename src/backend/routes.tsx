@@ -61,11 +61,17 @@ routes.post("/apply", (req, res) => {
   res.redirect(303, "/customise");
 });
 
-// Counter island, no-JS fallback. Slow on purpose so the difference is obvious.
-routes.post("/apply/increment", async (_req, res) => {
-  await new Promise((resolve) => setTimeout(resolve, 1500));
+// Counter island. One route serves both cases:
+// - plain form post (no JS): redirect, so the browser reloads the page
+// - fetch from the island (JS): reply with JSON, so the page does not reload
+routes.post("/apply/increment", (req, res) => {
   store.counter += 1;
-  res.redirect(303, "/apply");
+
+  if (req.accepts(["html", "json"]) === "json") {
+    res.json({ count: store.counter });
+  } else {
+    res.redirect(303, "/apply");
+  }
 });
 
 // ───────────────────────────── Permit options ─────────────────────────────

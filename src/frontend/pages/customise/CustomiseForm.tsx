@@ -24,7 +24,7 @@ type CustomiseFormProps = {
 /**
  * Works as a normal HTML form (POST /customise). With JS, React validates
  * before submit and updates price / zone list as you choose.
- * Choices and rules live in ./options.ts.
+ * Choices and rules live in ./options.ts, shared with the server.
  */
 export function CustomiseForm({
   initialValues,
@@ -35,7 +35,9 @@ export function CustomiseForm({
   const [errors, setErrors] = useState(initialErrors);
   const [zoneQuery, setZoneQuery] = useState(initialZoneQuery);
 
-  // false on the server and during hydration; true once React is running in the browser
+  // Used below to show different content with and without JS.
+  // false on the server and during hydration (so both render the same HTML);
+  // true once React is running in the browser. Without JS it stays false.
   const [jsEnabled, setJsEnabled] = useState(false);
   useEffect(() => setJsEnabled(true), []);
 
@@ -47,10 +49,13 @@ export function CustomiseForm({
     setErrors((current) => ({ ...current, [field]: undefined }));
   }
 
+  // With JS: checks the answers before sending, so errors show instantly with no
+  // reload. Without JS this never runs: the form posts and the server runs the
+  // same validateCustomise() rules, then shows the form again with the errors.
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     const nextErrors = validateCustomise(values);
     if (hasErrors(nextErrors)) {
-      event.preventDefault();
+      event.preventDefault(); // Stop the post so the page does not reload
       setErrors(nextErrors);
     }
     // Otherwise the browser submits normally and the server saves
@@ -60,6 +65,11 @@ export function CustomiseForm({
     <form method="post" action="/customise" noValidate onSubmit={onSubmit}>
       <ErrorSummary errors={errors} />
 
+      {/*
+        The radio buttons below are controlled by React (value + onChange).
+        With JS: choosing an option updates the price and clears that field's error at once.
+        Without JS: they are plain radio buttons and nothing changes until the form is posted.
+      */}
       <Radios
         name="duration"
         legend="How long do you need the permit?"
@@ -81,7 +91,12 @@ export function CustomiseForm({
         error={errors.visitorBay}
       />
 
-      {/* Without JS we cannot hide this, so the hint explains when it is needed */}
+      {/*
+        With JS: hidden until the user answers "Yes" to the visitor bay question.
+        Without JS: always shown, because nothing can react to the radio buttons.
+        The hint text explains it is only needed for a visitor bay.
+        The field stays in the form when hidden, so the server still receives it.
+      */}
       <TextInput
         name="visitorEndDate"
         label="Visitor bay end date"
@@ -94,6 +109,11 @@ export function CustomiseForm({
         hidden={jsEnabled && values.visitorBay !== "yes"}
       />
 
+      {/*
+        With JS: the total recalculates every time duration or visitor bay changes.
+        Without JS: this shows only what was last saved, and the hint at the bottom
+        says the total is confirmed on the next page.
+      */}
       <div className="app-price-box" aria-live="polite">
         <h2 className="govuk-heading-m">Estimated total</h2>
         <p className="govuk-body govuk-!-margin-bottom-0">
@@ -115,6 +135,11 @@ export function CustomiseForm({
         ) : null}
       </div>
 
+      {/*
+        With JS: the zone list below filters as you type (see visibleZones).
+        Without JS: the user types, then selects the "Filter zones" button, which
+        reloads the page with ?q=... so the server can filter the list.
+      */}
       <TextInput
         name="q"
         label="Filter zones"
@@ -130,12 +155,14 @@ export function CustomiseForm({
         onChange={(event) => setZoneQuery(event.target.value)}
       />
       {!jsEnabled ? (
-        // GET override so the server can filter the list without JS
+        // Only shown without JS, because with JS the list already filters as you type.
+        // formMethod="get" sends this one button as a GET (?q=...) instead of the form's POST.
         <Button type="submit" className="govuk-button--secondary" formMethod="get" formAction="/customise">
           Filter zones
         </Button>
       ) : null}
 
+      {/* visibleZones is the full list, or the list narrowed by the filter above */}
       <Radios
         name="zoneId"
         legend="Parking zone"

@@ -10,6 +10,12 @@ type CustomisePageProps = {
 };
 
 export function CustomisePage({ customise, errors, zoneQuery }: CustomisePageProps) {
+  const formProps = {
+    initialValues: customise,
+    initialErrors: errors,
+    initialZoneQuery: zoneQuery,
+  };
+
   return (
     <>
       <title>{`Permit options — ${SERVICE_NAME} — GOV.UK`}</title>
@@ -26,19 +32,8 @@ export function CustomisePage({ customise, errors, zoneQuery }: CustomisePagePro
         hydrateRoot on this div so validation, price and zone filter become live.
         data-props is how the server passes state into the browser.
       */}
-      <div
-        id="customise"
-        data-props={JSON.stringify({
-          initialValues: customise,
-          initialErrors: errors,
-          initialZoneQuery: zoneQuery,
-        })}
-      >
-        <CustomiseForm
-          initialValues={customise}
-          initialErrors={errors}
-          initialZoneQuery={zoneQuery}
-        />
+      <div id="customise" data-props={JSON.stringify(formProps)}>
+        <CustomiseForm {...formProps} />
       </div>
 
       {/* Load this page's island JS (pages with no island omit this tag). */}

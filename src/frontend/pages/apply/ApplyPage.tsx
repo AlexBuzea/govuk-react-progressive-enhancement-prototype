@@ -4,12 +4,7 @@ import { Button } from "../../components/Button";
 import { Radios } from "../../components/Radios";
 import { TextInput } from "../../components/TextInput";
 import { Counter } from "./Counter";
-
-/** Permit type choices — also used on the check-your-answers page. */
-export const PERMIT_TYPES = [
-  { value: "resident", label: "Resident permit" },
-  { value: "visitor", label: "Visitor permit" },
-];
+import { PERMIT_TYPES } from "./options";
 
 type ApplyPageProps = {
   application: ApplicationData;
@@ -21,6 +16,8 @@ type ApplyPageProps = {
  * The form is handled by POST /apply in backend/routes.tsx.
  */
 export function ApplyPage({ application, counter }: ApplyPageProps) {
+  const counterProps = { initialCount: counter };
+
   return (
     <>
       <title>{`Your application — ${SERVICE_NAME} — GOV.UK`}</title>
@@ -63,8 +60,8 @@ export function ApplyPage({ application, counter }: ApplyPageProps) {
         hydrateRoot on this div so the counter updates without a page reload.
         data-props is how the server passes state into the browser.
       */}
-      <div id="counter" data-props={JSON.stringify({ initialCount: counter })}>
-        <Counter initialCount={counter} />
+      <div id="counter" data-props={JSON.stringify(counterProps)}>
+        <Counter {...counterProps} />
       </div>
 
       {/* Load this page's island JS (pages with no island omit this tag). */}
