@@ -29,13 +29,6 @@ export function ApplyPage({ application, counter }: ApplyPageProps) {
 
       <form method="post" action="/apply" noValidate>
         <TextInput
-          name="fullName"
-          label="Full name"
-          autoComplete="name"
-          defaultValue={application.fullName}
-        />
-
-        <TextInput
           name="vehicleReg"
           label="Vehicle registration number"
           hint="For example, AB12 CDE"

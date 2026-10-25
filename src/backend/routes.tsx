@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { hasErrors, validateCustomise } from "../frontend/pages/customise/options";
+import { validateDetails } from "../frontend/pages/details/validation";
 import type { CustomiseData, PageData } from "../shared/types";
 import { renderApp } from "./ssr";
 import { emptyCustomise, store } from "./store";
@@ -9,7 +10,7 @@ import { emptyCustomise, store } from "./store";
  *
  * The page list (which URL shows which component) is frontend/App.tsx:
  *
- *   /  →  /apply  →  /customise  →  /check  →  /confirmation
+ *   /  →  /apply  →  /details  →  /customise  →  /check  →  /confirmation
  *
  * POST handlers live here because a form must work with JavaScript off.
  * Each one saves data and redirects to the next page in that list.
@@ -27,6 +28,8 @@ function text(value: unknown): string {
 function pageData(overrides: Partial<PageData> = {}): PageData {
   return {
     application: store.application,
+    details: store.details,
+    detailsErrors: {},
     customise: store.customise,
     customiseErrors: {},
     counter: store.counter,
@@ -54,11 +57,10 @@ function readCustomise(source: Record<string, unknown>, fallback: CustomiseData)
 
 routes.post("/apply", (req, res) => {
   store.application = {
-    fullName: text(req.body.fullName),
     vehicleReg: text(req.body.vehicleReg).toUpperCase(),
     permitType: text(req.body.permitType),
   };
-  res.redirect(303, "/customise");
+  res.redirect(303, "/details");
 });
 
 // Counter island. One route serves both cases:
@@ -72,6 +74,28 @@ routes.post("/apply/increment", (req, res) => {
   } else {
     res.redirect(303, "/apply");
   }
+});
+
+// ───────────────────────────── Name and address ─────────────────────────────
+
+// Server-only validation: the simplest form pattern, with no island.
+routes.post("/details", (req, res) => {
+  const details = {
+    fullName: text(req.body.fullName),
+    addressLine1: text(req.body.addressLine1),
+    addressLine2: text(req.body.addressLine2),
+    town: text(req.body.town),
+    postcode: text(req.body.postcode).toUpperCase(),
+  };
+  const errors = validateDetails(details);
+  store.details = details;
+
+  if (Object.keys(errors).length > 0) {
+    // Show the form again with error messages, keeping what the user typed
+    renderApp("/details", pageData({ details, detailsErrors: errors }), res);
+    return;
+  }
+  res.redirect(303, "/customise");
 });
 
 // ───────────────────────────── Permit options ─────────────────────────────

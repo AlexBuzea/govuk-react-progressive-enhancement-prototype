@@ -8,10 +8,21 @@ export const SERVICE_NAME = "Apply for a parking permit";
 
 /** Answers from the /apply form. */
 export type ApplicationData = {
-  fullName: string;
   vehicleReg: string;
   permitType: string;
 };
+
+/** Answers from the /details form. */
+export type DetailsData = {
+  fullName: string;
+  addressLine1: string;
+  addressLine2: string;
+  town: string;
+  postcode: string;
+};
+
+/** One error message per invalid field. An empty object means "all valid". */
+export type DetailsErrors = Partial<Record<keyof DetailsData, string>>;
 
 /** Answers from the /customise form. Prices are calculated, not stored. */
 export type CustomiseData = {
@@ -27,6 +38,8 @@ export type CustomiseErrors = Partial<Record<keyof CustomiseData, string>>;
 /** Everything Express passes into the React tree for one request. */
 export type PageData = {
   application: ApplicationData;
+  details: DetailsData;
+  detailsErrors: DetailsErrors;
   customise: CustomiseData;
   customiseErrors: CustomiseErrors;
   counter: number;

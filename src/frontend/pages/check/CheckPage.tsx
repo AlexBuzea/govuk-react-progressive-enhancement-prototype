@@ -1,4 +1,9 @@
-import { SERVICE_NAME, type ApplicationData, type CustomiseData } from "../../../shared/types";
+import {
+  SERVICE_NAME,
+  type ApplicationData,
+  type CustomiseData,
+  type DetailsData,
+} from "../../../shared/types";
 import { BackLink } from "../../components/BackLink";
 import { Button } from "../../components/Button";
 import { SummaryRow } from "../../components/SummaryRow";
@@ -13,15 +18,19 @@ import {
 
 type CheckPageProps = {
   application: ApplicationData;
+  details: DetailsData;
   customise: CustomiseData;
 };
 
 /** "Check your answers" — plain server-rendered HTML, no island needed. */
-export function CheckPage({ application, customise }: CheckPageProps) {
+export function CheckPage({ application, details, customise }: CheckPageProps) {
   const zone = findZone(customise.zoneId);
   const price = calculatePrice(customise.duration, customise.visitorBay);
+  const address = [details.addressLine1, details.addressLine2, details.town, details.postcode]
+    .filter(Boolean)
+    .join(", ");
 
-  const hasAnswers = application.fullName || application.vehicleReg || customise.duration;
+  const hasAnswers = application.vehicleReg || details.fullName || customise.duration;
 
   return (
     <>
@@ -41,11 +50,6 @@ export function CheckPage({ application, customise }: CheckPageProps) {
         <>
           <dl className="govuk-summary-list">
             <SummaryRow
-              label="Full name"
-              value={application.fullName || "Not provided"}
-              changeHref="/apply"
-            />
-            <SummaryRow
               label="Vehicle registration"
               value={application.vehicleReg || "Not provided"}
               changeHref="/apply"
@@ -54,6 +58,16 @@ export function CheckPage({ application, customise }: CheckPageProps) {
               label="Permit type"
               value={labelFor(PERMIT_TYPES, application.permitType)}
               changeHref="/apply"
+            />
+            <SummaryRow
+              label="Full name"
+              value={details.fullName || "Not provided"}
+              changeHref="/details"
+            />
+            <SummaryRow
+              label="Address"
+              value={address || "Not provided"}
+              changeHref="/details"
             />
             <SummaryRow
               label="Duration"

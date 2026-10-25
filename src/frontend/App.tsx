@@ -5,11 +5,12 @@ import { ApplyPage } from "./pages/apply/ApplyPage";
 import { CheckPage } from "./pages/check/CheckPage";
 import { ConfirmationPage } from "./pages/confirmation/ConfirmationPage";
 import { CustomisePage } from "./pages/customise/CustomisePage";
+import { DetailsPage } from "./pages/details/DetailsPage";
 import { HomePage } from "./pages/home/HomePage";
 import { NotFoundPage } from "./pages/not-found/NotFoundPage";
 
 /**
- * Pages in visit order: / → /apply → /customise → /check → /confirmation
+ * Pages in visit order: / → /apply → /details → /customise → /check → /confirmation
  *
  * Each page renders its own <title>. React 19 moves that into <head>.
  * Form POSTs are handled in backend/routes.tsx so they work without JavaScript.
@@ -31,6 +32,10 @@ export function App({ data }: AppProps) {
           element={<ApplyPage application={data.application} counter={data.counter} />}
         />
         <Route
+          path="/details"
+          element={<DetailsPage details={data.details} errors={data.detailsErrors} />}
+        />
+        <Route
           path="/customise"
           element={
             <CustomisePage
@@ -42,7 +47,13 @@ export function App({ data }: AppProps) {
         />
         <Route
           path="/check"
-          element={<CheckPage application={data.application} customise={data.customise} />}
+          element={
+            <CheckPage
+              application={data.application}
+              details={data.details}
+              customise={data.customise}
+            />
+          }
         />
         <Route path="/confirmation" element={<ConfirmationPage />} />
         <Route path="*" element={<NotFoundPage />} />

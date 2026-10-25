@@ -44,7 +44,7 @@ export function CustomiseForm({
   const price = calculatePrice(values.duration, values.visitorBay);
   const visibleZones = filterZones(zoneQuery);
 
-  function update(field: keyof CustomiseData, value: string) {
+  function handleUpdate(field: keyof CustomiseData, value: string) {
     setValues((current) => ({ ...current, [field]: value }));
     setErrors((current) => ({ ...current, [field]: undefined }));
   }
@@ -75,7 +75,7 @@ export function CustomiseForm({
         legend="How long do you need the permit?"
         options={DURATIONS.map((d) => ({ value: d.value, label: `${d.label} (£${d.price})` }))}
         value={values.duration}
-        onChange={(value) => update("duration", value)}
+        onChange={(value) => handleUpdate("duration", value)}
         error={errors.duration}
       />
 
@@ -85,8 +85,8 @@ export function CustomiseForm({
         options={YES_NO}
         value={values.visitorBay}
         onChange={(value) => {
-          update("visitorBay", value);
-          if (value === "no") update("visitorEndDate", "");
+          handleUpdate("visitorBay", value);
+          if (value === "no") handleUpdate("visitorEndDate", "");
         }}
         error={errors.visitorBay}
       />
@@ -104,7 +104,7 @@ export function CustomiseForm({
         className="govuk-input--width-10"
         autoComplete="off"
         value={values.visitorEndDate}
-        onChange={(event) => update("visitorEndDate", event.target.value)}
+        onChange={(event) => handleUpdate("visitorEndDate", event.target.value)}
         error={errors.visitorEndDate}
         hidden={jsEnabled && values.visitorBay !== "yes"}
       />
@@ -171,7 +171,7 @@ export function CustomiseForm({
           label: `${zone.name} (${zone.id}) — ${zone.area}`,
         }))}
         value={values.zoneId}
-        onChange={(value) => update("zoneId", value)}
+        onChange={(value) => handleUpdate("zoneId", value)}
         error={errors.zoneId}
       />
       {visibleZones.length === 0 ? (

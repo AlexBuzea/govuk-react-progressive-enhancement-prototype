@@ -19,7 +19,7 @@ export function CustomisePage({ customise, errors, zoneQuery }: CustomisePagePro
   return (
     <>
       <title>{`Permit options — ${SERVICE_NAME} — GOV.UK`}</title>
-      <BackLink href="/apply" />
+      <BackLink href="/details" />
       <h1 className="govuk-heading-l">Permit options</h1>
       <p className="govuk-body">
         Choose duration, extras and your parking zone. With JavaScript on, the

@@ -36,6 +36,24 @@ Browser requests /apply
 
 Forms are plain HTML forms. They POST to Express, which saves the data and redirects to the next page. The service works without React running in the browser.
 
+Pages in visit order: `/` → `/apply` → `/details` → `/customise` → `/check` → `/confirmation`
+
+### Server-only pages (most pages)
+
+Most pages need no JavaScript at all. React is only used to write the HTML on the server, the same way a template engine would be. These pages have no island and no `<script>` tag.
+
+`/details` (your name and address) is the example to copy for a form with validation:
+
+```
+User selects "Save and continue"
+  → browser POSTs the form to /details
+  → backend/routes.tsx runs validateDetails() (pages/details/validation.ts)
+  → errors?    render the page again with error messages and what the user typed
+  → no errors? save and redirect to /customise
+```
+
+The error messages and error summary at the top come from the server, so they work for everyone. Home, Check your answers and Confirmation are server-only too, with no form validation.
+
 ### Islands
 
 An island is a React component that is rendered to HTML on the server (visible immediately) and then **hydrated** in the browser so it becomes interactive. Only the JavaScript for that island is sent; pages without an island send no JavaScript.
@@ -87,6 +105,7 @@ src/
 | Page header, footer, stylesheets? | `frontend/Document.tsx` |
 | Browser tab title? | `<title>` at the top of the page component |
 | What happens on form submit? | `backend/routes.tsx` |
+| Simplest form with validation (no JS)? | `pages/details/` |
 | Customise validation, price, zones? | `pages/customise/options.ts` |
 | How does an island hydrate? | `frontend/islands/counter.tsx` |
 | How are island scripts built? | `vite.config.ts` |
@@ -113,7 +132,7 @@ export function MyPage() {
 ```
 
 2. In `App.tsx`, add a `<Route>` for it.
-3. If it has a form, add a POST in `backend/routes.tsx` that saves the data and redirects.
+3. If it has a form, add a POST in `backend/routes.tsx` that saves the data and redirects. To validate it, copy the `/details` pattern.
 
 You do not add a GET in Express: one catch-all renders every page.
 
