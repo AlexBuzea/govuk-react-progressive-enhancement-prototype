@@ -1,8 +1,10 @@
 import { useState, type FormEvent } from "react";
 import { Button } from "../../components/Button";
+import { CsrfField } from "../../components/CsrfField";
 
 type CounterProps = {
   initialCount: number;
+  csrfToken: string;
 };
 
 /**
@@ -17,7 +19,7 @@ type CounterProps = {
  * For a realistic example of an island, see the permit options form
  * (pages/customise/CustomiseForm.tsx).
  */
-export function Counter({ initialCount }: CounterProps) {
+export function Counter({ initialCount, csrfToken }: CounterProps) {
   const [count, setCount] = useState(initialCount);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -26,6 +28,7 @@ export function Counter({ initialCount }: CounterProps) {
     await fetch("/apply/increment", {
       method: "POST",
       headers: { Accept: "application/json" }, // Tells the server we are not a plain form post
+      body: new URLSearchParams({ _csrf: csrfToken }), // Same hidden field a form post would send
     });
   }
 
@@ -41,6 +44,7 @@ export function Counter({ initialCount }: CounterProps) {
         Current count: <strong id="counter-value">{count}</strong>
       </p>
       <form method="post" action="/apply/increment" onSubmit={onSubmit}>
+        <CsrfField token={csrfToken} />
         <Button type="submit">Increment counter</Button>
       </form>
     </div>

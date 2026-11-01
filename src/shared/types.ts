@@ -1,5 +1,5 @@
 /**
- * Data shapes used by the store, Express, and React pages.
+ * Data shapes shared by Express and the React pages.
  * Keep this file small — form choices/rules live next to the page that owns
  * them (see pages/customise/options.ts).
  */
@@ -44,17 +44,3 @@ export type CustomiseData = {
 
 /** One error message per invalid field. An empty object means "all valid". */
 export type CustomiseErrors = Partial<Record<keyof CustomiseData, string>>;
-
-/** Everything Express passes into the React tree for one request. */
-export type PageData = {
-  application: ApplicationData;
-  details: DetailsData;
-  detailsErrors: DetailsErrors;
-  organisation: OrganisationData;
-  organisationErrors: OrganisationErrors;
-  customise: CustomiseData;
-  customiseErrors: CustomiseErrors;
-  counter: number;
-  /** Zone search text from ?q= after a no-JS "Filter zones" submit. */
-  zoneQuery: string;
-};

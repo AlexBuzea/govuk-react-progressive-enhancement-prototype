@@ -1,10 +1,10 @@
 # Apply for a parking permit — React SSR prototype
 
-A GOV.UK-style service built with Node, Express, TypeScript and React. No meta-framework (no Next.js).
+> **This is a prototype.** It shows how a GOV.UK service could be built with React instead of Nunjucks while still following progressive enhancement. It is not a production service: answers are kept in server memory and lost on restart, and nothing is really submitted.
 
-The idea: **every page is a working HTML page first, and React makes parts of it better when JavaScript is available.**
+Built with Node, Express, TypeScript and React. No meta-framework (no Next.js).
 
-> Prototype only. Data lives in memory (`backend/store.ts`) and is shared by all visitors until the server restarts.
+The idea: **every page is a working HTML page first. React only runs in the browser where it makes a page better.**
 
 ## Quick start
 
@@ -13,170 +13,112 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). Try it with JavaScript turned off in DevTools too.
+Needs Node 22 or later. Open [http://localhost:3000](http://localhost:3000), then try it again with JavaScript turned off in DevTools. Everything still works.
+
+To run it the way a host does: `npm run build && npm start`.
 
 | Command | What it does |
 |---|---|
 | `npm run dev` | Rebuilds island scripts and restarts the server on change |
-| `npm start` | Builds island scripts once, then starts the server |
+| `npm run build` | Builds the island scripts once (needed before `npm start`) |
+| `npm start` | Starts the server (does not build) |
+| `npm test` | Runs all tests |
 | `npm run typecheck` | Type checks the whole project |
 
 ---
 
-## How it works
+## Two types of page
 
-```
-Browser requests /apply
-  → Express (backend/routes.tsx) reads data from the store
-  → renderApp() streams HTML (backend/ssr.tsx)
-  → React Router (frontend/App.tsx) picks <ApplyPage /> from the URL
-  → Browser shows the HTML          ← works with or without JS
-  → If the page has an island <script>, it loads and makes that part interactive
-```
+Every page is written as a React component and turned into HTML **on the server**. The browser always receives a complete page. What differs is whether React also runs in the browser afterwards.
 
-Forms are plain HTML forms. They POST to Express, which saves the data and redirects to the next page. The service works without React running in the browser.
+### 1. Server-only pages (most pages)
 
-Pages in visit order: `/` → `/apply` → `/details` → `/customise` → `/check` → `/confirmation`
+React is used like a template engine: it produces the HTML on the server and nothing else. No React is sent to the browser.
 
-### Conditional routing
-
-The next page can depend on what the user answered. Example: a commercial permit goes to `/organisation-details` instead of `/details`.
-
-The rule is one plain function, `detailsPageFor()` in `shared/journey.ts`:
-
-```ts
-detailsPageFor("commercial") // "/organisation-details"
-detailsPageFor("resident")   // "/details"
-```
-
-It is used in three places, so the rule is written once:
-
-| Where | What it decides |
-|---|---|
-| `POST /apply` in `backend/routes.tsx` | Where to redirect next |
-| Back link on `/customise` | Where "Back" goes |
-| "Change" links on `/check` | Which page to edit |
-
-Back links and Change links need no special support: pass the answer to the page as a prop and call the same function. To add another branch, change that one function.
-
-### Server-only pages (most pages)
-
-Most pages need no JavaScript at all. React is only used to write the HTML on the server, the same way a template engine would be. These pages have no island and no `<script>` tag.
-
-`/details` (your name and address) is the example to copy for a form with validation:
+Forms are plain HTML forms. They post to the server, which checks the answers and either shows the page again with error messages or moves the user on to the next page.
 
 ```
 User selects "Save and continue"
-  → browser POSTs the form to /details
-  → backend/routes.tsx runs validateDetails() (pages/details/validation.ts)
-  → errors?    render the page again with error messages and what the user typed
-  → no errors? save and redirect to /customise
+  → browser posts the form to /details
+  → the server checks the answers (pages/details/validation.ts)
+  → errors?    show the page again with error messages and what the user typed
+  → no errors? save the answers and go to the next page
 ```
 
-The error messages and error summary at the top come from the server, so they work for everyone. Home, Check your answers and Confirmation are server-only too, with no form validation.
+Examples: start page, `/details`, `/organisation-details`, `/check`, `/confirmation`. **Copy `/details` for a new form.**
 
-### Islands
+### 2. Pages with an island
 
-An island is a React component that is rendered to HTML on the server (visible immediately) and then **hydrated** in the browser so it becomes interactive. Only the JavaScript for that island is sent; pages without an island send no JavaScript.
+An **island** is one part of a page that becomes interactive in the browser.
 
-| Part | Where | Example |
+1. The server renders the whole page to HTML, island included. The user sees it straight away.
+2. A small script then loads React for that one part and attaches it to the HTML already on the page. This is called **hydrating**.
+3. That part now reacts instantly to what the user does. The rest of the page stays plain HTML.
+
+Without JavaScript, step 2 never happens and the island works as a normal server-rendered form. So an island must always have a no-JS version that does the same job.
+
+| Island | Without JS | With JS |
 |---|---|---|
-| Island markup and `<script>` tag | In the page component | `pages/apply/ApplyPage.tsx` |
-| Browser entry (`hydrateRoot`) | `frontend/islands/` | `islands/counter.tsx` |
+| **Counter** on `/apply` (the smallest example) | Each click posts the form and reloads the page | The number updates instantly; the same request saves it in the background |
+| **Permit options** on `/customise` (the realistic example) | Errors, price and zone filtering come from the server after a reload | Errors show before sending, the price updates as you choose, zones filter as you type |
 
-There are two islands:
-
-- **Counter on `/apply`** — the smallest example. Both save the count through the same `POST /apply/increment`. Without JS the page reloads on every click; with JS the number updates instantly and the request is sent in the background. It is a teaching toy; the permit options form below is the realistic example.
-- **Permit options on `/customise`** — the whole form is an island:
-
-| Feature | JS off (server) | JS on (React) |
-|---|---|---|
-| Validation | POST re-renders the form with errors | Checked before submit |
-| Price | Shown on the check page | Updates as you choose |
-| Zone search | "Filter zones" reloads the page | Filters as you type |
-
-Choices and rules live in `pages/customise/options.ts` and run on **both** the server and the island, so they cannot drift apart.
+The validation and price rules (`pages/customise/options.ts`) run on both the server and in the browser, so the two versions cannot disagree.
 
 ---
 
-## Project structure
+## Where things are
 
 ```
 src/
   backend/
-    app.ts          Express setup and static files
-    routes.tsx      Form POSTs, then one GET that renders any page
-    ssr.tsx         renderApp(): React → streamed HTML
-    store.ts        In-memory data (prototype only)
+    routes/
+      permit-application/
+        index.ts      Every URL in the journey, one line per page (start here)
+        details.tsx   What happens when a page is shown and when its form is posted
+    session/          Each visitor's answers, and CSRF protection
+    middleware/       Security headers and static files
+    utils/render.tsx  Turns a page component into HTML
   frontend/
-    App.tsx         URL → page component
-    Document.tsx    <html> shell: head, header, footer, current page
-    components/     GOV.UK UI pieces (Button, TextInput, Radios…)
-    islands/        Browser entry points, one file per island
-    pages/          One folder per page (page component, plus any island and options)
-  shared/
-    types.ts        Data shapes and SERVICE_NAME, used by backend and frontend
-    journey.ts      Which page comes next when it depends on an answer
+    Document.tsx      The <html> shell: head, header, footer
+    components/       GOV.UK components (TextInput, Radios, ErrorSummary...)
+    pages/            One folder per page
+    islands/          Browser scripts, one per island
+  shared/             Types and rules used by both server and browser
+public/               CSS and small browser scripts
 ```
 
-### Where to look
+The route file reads like a React Router config: the URL, the component it shows, and where its form goes next.
 
-| Question | File |
-|---|---|
-| Which URL shows which page? | `frontend/App.tsx` |
-| Page header, footer, stylesheets? | `frontend/Document.tsx` |
-| Browser tab title? | `<title>` at the top of the page component |
-| What happens on form submit? | `backend/routes.tsx` |
-| Simplest form with validation (no JS)? | `pages/details/` |
-| Customise validation, price, zones? | `pages/customise/options.ts` |
-| How does an island hydrate? | `frontend/islands/counter.tsx` |
-| How are island scripts built? | `vite.config.ts` |
+```ts
+router.route("/details").get(showDetailsPage).post(saveDetails); // <DetailsPage> → /customise
+```
 
 Search for `>>>` in the code to find where each kind of addition goes.
 
----
+## How to add a server-only page
 
-## How to add a page
+1. Create the component in `frontend/pages/<name>/`. Copy `pages/details/` if it has a form.
+2. Add its handlers in `backend/routes/permit-application/<name>.tsx`. Copy `details.tsx`.
+3. Add one line for it in `backend/routes/permit-application/index.ts`.
 
-1. Create `src/frontend/pages/<name>/<Name>Page.tsx`. Each page sets its own tab title with a `<title>` (React 19 moves it into `<head>`):
-
-```tsx
-import { SERVICE_NAME } from "../../../shared/types";
-
-export function MyPage() {
-  return (
-    <>
-      <title>{`My page — ${SERVICE_NAME} — GOV.UK`}</title>
-      <h1 className="govuk-heading-l">My page</h1>
-    </>
-  );
-}
-```
-
-2. In `App.tsx`, add a `<Route>` for it.
-3. If it has a form, add a POST in `backend/routes.tsx` that saves the data and redirects. To validate it, copy the `/details` pattern.
-
-You do not add a GET in Express: one catch-all renders every page.
+Every form needs `<CsrfField token={csrfToken} />` inside it.
 
 ## How to add an island
 
-The component runs twice: the server renders it to HTML, then the browser script runs it again on top of that HTML so it becomes interactive. Both runs need the same props, so the server passes them to the browser as text.
+The island component runs twice: on the server to make the HTML, then in the browser to make it interactive. Both runs need the same props, so the server writes them into the page as text. That means props can only be strings, numbers, booleans, arrays and plain objects.
 
-1. Build a normal component. Its props travel as text, so use only strings, numbers, booleans, arrays and plain objects (no functions or dates).
-2. In the page, create the props once and use them in both places:
+In the page:
 
 ```tsx
 const props = { initialCount: 0 };
 
-{/* 1. Browser: the island script reads these props from data-props */}
-<div id="my-island" data-props={JSON.stringify(props)}>
-  {/* 2. Server: renders the component to HTML using the same props */}
-  <MyComponent {...props} />
+<div id="my-island" data-props={JSON.stringify(props)}>   {/* props for the browser */}
+  <MyComponent {...props} />                              {/* HTML from the server */}
 </div>
 <script type="module" src="/islands/my-island.js" />
 ```
 
-3. Add `src/frontend/islands/my-island.tsx`:
+Then add `frontend/islands/my-island.tsx`:
 
 ```tsx
 import { hydrateRoot } from "react-dom/client";
@@ -189,6 +131,37 @@ if (root) {
 }
 ```
 
-Vite builds it to `public/islands/my-island.js` automatically; no config change needed.
+Vite builds it to `public/islands/my-island.js` automatically.
 
-Keep the no-JS path working: the form should still POST to a server route that does the same job.
+---
+
+## Deploy to Render
+
+The repo includes a `render.yaml` that sets everything up.
+
+1. Push the repo to GitHub.
+2. In [Render](https://render.com), choose **New → Blueprint** and select the repository.
+3. Approve the settings. Render builds it and gives you a URL.
+
+Render generates the `SESSION_SECRET` for you. Other hosts that run Node work too: build with `npm install && npm run build`, start with `npm start`, and set `NODE_ENV=production` and `SESSION_SECRET`.
+
+The free plan sleeps after about 15 minutes of no visits, so the first page load can take up to a minute. Answers are kept in memory, so they are lost when it sleeps. If a form says "Your session has ended", reload the page and start again.
+
+---
+
+## Why React instead of Nunjucks?
+
+- **Type safety**: a missing prop or renamed field is a compile error, not a blank space on the page.
+- **One set of rules**: validation runs on the server and in the browser from the same code.
+- **Testable**: components and pages are tested, including automated accessibility checks with axe.
+- **Interactivity only where needed**: islands, not a single-page app.
+
+**Trade-offs:** the GOV.UK Design System maintains the Nunjucks macros for you, while the React components in this app are currently written by hand. There is also a build step, and designers used to the Prototype Kit would need support to edit JSX.
+
+**The components here are a proof of concept.** In a real project they would be a component library published as an npm package, with Storybook so developers can build and test each component in isolation and designers can review every state without running a service.
+
+## Not production-ready
+
+Already in place: per-visitor sessions, CSRF protection, security headers, accessible GOV.UK markup and automated tests.
+
+Still needed before real use: a shared session store (e.g. Redis), saving the submitted application, logging and monitoring, and testing with real assistive technology.

@@ -10,18 +10,26 @@ type CustomisePageProps = {
   errors: CustomiseErrors;
   /** Zone search text from ?q= after a no-JS "Filter zones" submit. */
   zoneQuery: string;
+  csrfToken: string;
 };
 
-export function CustomisePage({ permitType, customise, errors, zoneQuery }: CustomisePageProps) {
+export function CustomisePage({
+  permitType,
+  customise,
+  errors,
+  zoneQuery,
+  csrfToken,
+}: CustomisePageProps) {
   const formProps = {
     initialValues: customise,
     initialErrors: errors,
     initialZoneQuery: zoneQuery,
+    csrfToken,
   };
 
   return (
     <>
-      <title>{`Permit options — ${SERVICE_NAME} — GOV.UK`}</title>
+      <title>{`${Object.keys(errors).length > 0 ? "Error: " : ""}Permit options — ${SERVICE_NAME} — GOV.UK`}</title>
       <BackLink href={detailsPageFor(permitType)} />
       <h1 className="govuk-heading-l">Permit options</h1>
       <p className="govuk-body">

@@ -1,12 +1,14 @@
 import { SERVICE_NAME, type DetailsData, type DetailsErrors } from "../../../shared/types";
 import { BackLink } from "../../components/BackLink";
 import { Button } from "../../components/Button";
+import { CsrfField } from "../../components/CsrfField";
 import { ErrorSummary } from "../../components/ErrorSummary";
 import { TextInput } from "../../components/TextInput";
 
 type DetailsPageProps = {
   details: DetailsData;
   errors: DetailsErrors;
+  csrfToken: string;
 };
 
 /**
@@ -14,11 +16,11 @@ type DetailsPageProps = {
  * It is a normal React component that the server turns into HTML.
  *
  * 1. The user selects "Save and continue" and the browser POSTs to /details.
- * 2. backend/routes.tsx validates the answers (pages/details/validation.ts).
+ * 2. backend/routes/permit-application/details.tsx validates the answers (pages/details/validation.ts).
  * 3. If something is missing, the server renders this page again with
  *    `errors` and what the user typed. Otherwise it redirects to /customise.
  */
-export function DetailsPage({ details, errors }: DetailsPageProps) {
+export function DetailsPage({ details, errors, csrfToken }: DetailsPageProps) {
   const hasErrors = Object.keys(errors).length > 0;
 
   return (
@@ -28,6 +30,7 @@ export function DetailsPage({ details, errors }: DetailsPageProps) {
       <BackLink href="/apply" />
 
       <form method="post" action="/details" noValidate>
+        <CsrfField token={csrfToken} />
         <ErrorSummary errors={errors} />
 
         <h1 className="govuk-heading-l">Your name and address</h1>

@@ -1,6 +1,7 @@
 import { SERVICE_NAME, type ApplicationData } from "../../../shared/types";
 import { BackLink } from "../../components/BackLink";
 import { Button } from "../../components/Button";
+import { CsrfField } from "../../components/CsrfField";
 import { Radios } from "../../components/Radios";
 import { TextInput } from "../../components/TextInput";
 import { Counter } from "./Counter";
@@ -9,14 +10,15 @@ import { PERMIT_TYPES } from "./options";
 type ApplyPageProps = {
   application: ApplicationData;
   counter: number;
+  csrfToken: string;
 };
 
 /**
  * Application form followed by the counter demo island.
- * The form is handled by POST /apply in backend/routes.tsx.
+ * The form is handled by POST /apply in backend/routes/permit-application/apply.tsx.
  */
-export function ApplyPage({ application, counter }: ApplyPageProps) {
-  const counterProps = { initialCount: counter };
+export function ApplyPage({ application, counter, csrfToken }: ApplyPageProps) {
+  const counterProps = { initialCount: counter, csrfToken };
 
   return (
     <>
@@ -24,10 +26,11 @@ export function ApplyPage({ application, counter }: ApplyPageProps) {
       <BackLink href="/" />
       <h1 className="govuk-heading-l">Your application</h1>
       <p className="govuk-body">
-        Enter your details. This form works with JavaScript turned off.
+        Enter your vehicle and choose a permit type. This form works with JavaScript turned off.
       </p>
 
       <form method="post" action="/apply" noValidate>
+        <CsrfField token={csrfToken} />
         <TextInput
           name="vehicleReg"
           label="Vehicle registration number"

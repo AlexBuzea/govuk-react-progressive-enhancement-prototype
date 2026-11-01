@@ -5,27 +5,36 @@
   "type": "module",
   "description": "GOV.UK-style React SSR prototype with progressive enhancement",
   "scripts": {
-    "build:islands": "vite build",
     "dev": "concurrently \"vite build --watch\" \"tsx watch src/backend/index.ts\"",
-    "start": "vite build && tsx src/backend/index.ts",
-    "typecheck": "tsc --noEmit"
+    "build": "vite build",
+    "start": "tsx src/backend/index.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test \"src/**/*.test.ts\" \"src/**/*.test.tsx\""
   },
   "dependencies": {
-    "express": "^4.21.2",
+    "@vitejs/plugin-react": "^4.3.4",
+    "express": "^5.3.0",
+    "express-session": "^1.19.0",
     "govuk-frontend": "^6.5.1",
+    "helmet": "^8.3.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "react-router-dom": "^6.30.6"
+    "tsx": "^4.19.2",
+    "vite": "^6.0.6"
   },
   "devDependencies": {
-    "@types/express": "^4.17.21",
+    "@types/express": "^5.0.6",
+    "@types/express-session": "^1.19.0",
+    "@types/jsdom": "^30.0.0",
     "@types/node": "^22.10.0",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "@vitejs/plugin-react": "^4.3.4",
+    "axe-core": "^4.14.0",
     "concurrently": "^9.1.2",
-    "tsx": "^4.19.2",
-    "typescript": "^5.7.2",
-    "vite": "^6.0.6"
+    "jsdom": "^27.0.1",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }

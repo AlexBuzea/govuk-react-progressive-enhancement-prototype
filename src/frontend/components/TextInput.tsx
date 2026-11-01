@@ -26,6 +26,10 @@ export function TextInput({
   ...inputProps
 }: TextInputProps) {
   const hintId = `${name}-hint`;
+  const errorId = `${name}-error`;
+
+  // Screen readers read the hint and error when the input is focused
+  const describedBy = [hint ? hintId : "", error ? errorId : ""].filter(Boolean).join(" ");
 
   return (
     <div className={`govuk-form-group${error ? " govuk-form-group--error" : ""}`} hidden={hidden}>
@@ -40,7 +44,7 @@ export function TextInput({
       ) : null}
 
       {error ? (
-        <p className="govuk-error-message">
+        <p id={errorId} className="govuk-error-message">
           <span className="govuk-visually-hidden">Error:</span> {error}
         </p>
       ) : null}
@@ -49,7 +53,7 @@ export function TextInput({
         className={`govuk-input ${className}${error ? " govuk-input--error" : ""}`.trim()}
         id={name}
         name={name}
-        aria-describedby={hint ? hintId : undefined}
+        aria-describedby={describedBy || undefined}
         {...inputProps}
       />
     </div>

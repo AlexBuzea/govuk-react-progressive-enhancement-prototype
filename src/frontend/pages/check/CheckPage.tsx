@@ -8,6 +8,7 @@ import {
 } from "../../../shared/types";
 import { BackLink } from "../../components/BackLink";
 import { Button } from "../../components/Button";
+import { CsrfField } from "../../components/CsrfField";
 import { SummaryRow } from "../../components/SummaryRow";
 import { PERMIT_TYPES } from "../apply/options";
 import {
@@ -23,10 +24,17 @@ type CheckPageProps = {
   details: DetailsData;
   organisation: OrganisationData;
   customise: CustomiseData;
+  csrfToken: string;
 };
 
 /** "Check your answers" — plain server-rendered HTML, no island needed. */
-export function CheckPage({ application, details, organisation, customise }: CheckPageProps) {
+export function CheckPage({
+  application,
+  details,
+  organisation,
+  customise,
+  csrfToken,
+}: CheckPageProps) {
   const zone = findZone(customise.zoneId);
   const price = calculatePrice(customise.duration, customise.visitorBay);
   const address = [details.addressLine1, details.addressLine2, details.town, details.postcode]
@@ -132,7 +140,8 @@ export function CheckPage({ application, details, organisation, customise }: Che
             />
           </dl>
 
-          <form method="post" action="/submit">
+          <form method="post" action="/check">
+            <CsrfField token={csrfToken} />
             <Button type="submit">Accept and send</Button>
           </form>
         </>

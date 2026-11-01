@@ -18,20 +18,25 @@ type RadiosProps = {
 
 /** GOV.UK radio buttons: https://design-system.service.gov.uk/components/radios/ */
 export function Radios({ name, legend, options, value, error, onChange }: RadiosProps) {
+  const errorId = `${name}-error`;
+
   return (
     <div className={`govuk-form-group${error ? " govuk-form-group--error" : ""}`}>
-      <fieldset className="govuk-fieldset" id={name}>
+      {/* Screen readers read the error when focus enters the group */}
+      <fieldset className="govuk-fieldset" aria-describedby={error ? errorId : undefined}>
         <legend className="govuk-fieldset__legend govuk-fieldset__legend--m">{legend}</legend>
 
         {error ? (
-          <p className="govuk-error-message">
+          <p id={errorId} className="govuk-error-message">
             <span className="govuk-visually-hidden">Error:</span> {error}
           </p>
         ) : null}
 
         <div className="govuk-radios">
-          {options.map((option) => {
-            const id = `${name}-${option.value}`;
+          {options.map((option, index) => {
+            // The first radio's id is just the field name, so the error summary
+            // link (#name) lands on it. The rest are name-2, name-3...
+            const id = index === 0 ? name : `${name}-${index + 1}`;
 
             // Controlled (React island): onChange is provided, React owns the checked state.
             // Uncontrolled (plain HTML form): no onChange, the browser owns the checked state.

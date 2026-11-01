@@ -5,19 +5,25 @@ import {
 } from "../../../shared/types";
 import { BackLink } from "../../components/BackLink";
 import { Button } from "../../components/Button";
+import { CsrfField } from "../../components/CsrfField";
 import { ErrorSummary } from "../../components/ErrorSummary";
 import { TextInput } from "../../components/TextInput";
 
 type OrganisationDetailsPageProps = {
   organisation: OrganisationData;
   errors: OrganisationErrors;
+  csrfToken: string;
 };
 
 /**
  * Server-only page, same pattern as pages/details/DetailsPage.tsx.
  * Commercial permits come here instead of /details (see shared/journey.ts).
  */
-export function OrganisationDetailsPage({ organisation, errors }: OrganisationDetailsPageProps) {
+export function OrganisationDetailsPage({
+  organisation,
+  errors,
+  csrfToken,
+}: OrganisationDetailsPageProps) {
   const hasErrors = Object.keys(errors).length > 0;
 
   return (
@@ -26,6 +32,7 @@ export function OrganisationDetailsPage({ organisation, errors }: OrganisationDe
       <BackLink href="/apply" />
 
       <form method="post" action="/organisation-details" noValidate>
+        <CsrfField token={csrfToken} />
         <ErrorSummary errors={errors} />
 
         <h1 className="govuk-heading-l">Your organisation</h1>

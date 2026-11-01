@@ -1,17 +1,27 @@
-import { Outlet } from "react-router-dom";
+import type { ReactNode } from "react";
 import { SERVICE_NAME } from "../shared/types";
 import { Footer } from "./components/Footer";
 import { Header } from "./components/Header";
 
+type DocumentProps = {
+  children: ReactNode;
+};
+
 /**
  * The <html> shell shared by every page: head, stylesheets, header, footer,
- * and the current page (<Outlet />).
+ * and the page itself (children).
  *
  * The browser tab title is a <title> on each page. React 19 hoists it into
- * this <head> while rendering. Island <script> tags live on the pages that
- * need them — pages without an island send no JavaScript.
+ * this <head> while rendering.
+ *
+ * Scripts, all plain files (no inline scripts, so the strict
+ * Content-Security-Policy in backend/middleware/security-headers.ts allows them):
+ * - js-enabled.js: tells the GOV.UK CSS that JavaScript is available
+ * - govuk-init.js: GOV.UK Design System behaviour, e.g. focusing the error summary
+ * - Island scripts (React) are added by the pages that need them. Pages
+ *   without an island send no React.
  */
-export function Document() {
+export function Document({ children }: DocumentProps) {
   return (
     <html lang="en" className="govuk-template">
       <head>
@@ -25,13 +35,7 @@ export function Document() {
         <link rel="stylesheet" href="/styles.css" />
       </head>
       <body className="govuk-template__body">
-        {/* GOV.UK Frontend CSS uses these classes when JS is available */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html:
-              "document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');",
-          }}
-        />
+        <script src="/js-enabled.js" />
 
         <a href="#main-content" className="govuk-skip-link">
           Skip to main content
@@ -40,16 +44,16 @@ export function Document() {
         <Header serviceName={SERVICE_NAME} />
 
         <div className="govuk-width-container">
-          <main className="govuk-main-wrapper" id="main-content" role="main">
+          <main className="govuk-main-wrapper" id="main-content">
             <div className="govuk-grid-row">
-              <div className="govuk-grid-column-two-thirds">
-                <Outlet />
-              </div>
+              <div className="govuk-grid-column-two-thirds">{children}</div>
             </div>
           </main>
         </div>
 
         <Footer />
+
+        <script type="module" src="/govuk-init.js" />
       </body>
     </html>
   );

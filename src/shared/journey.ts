@@ -3,7 +3,8 @@
  *
  * Commercial permits ask for organisation details; every other permit asks
  * for a person's name and address. Used by POST /apply (where to go next),
- * and by the back link and "Change" links on later pages, so the rule is
+ * the back link and "Change" links on later pages, and the details pages
+ * themselves (to redirect anyone who types the wrong URL), so the rule is
  * written once.
  */
 export function detailsPageFor(permitType: string): string {

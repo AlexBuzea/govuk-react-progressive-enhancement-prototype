@@ -1,6 +1,8 @@
 import { useEffect, useState, type FormEvent } from "react";
+import { flushSync } from "react-dom";
 import type { CustomiseData, CustomiseErrors } from "../../../shared/types";
 import { Button } from "../../components/Button";
+import { CsrfField } from "../../components/CsrfField";
 import { ErrorSummary } from "../../components/ErrorSummary";
 import { Radios } from "../../components/Radios";
 import { TextInput } from "../../components/TextInput";
@@ -19,6 +21,7 @@ type CustomiseFormProps = {
   initialValues: CustomiseData;
   initialErrors: CustomiseErrors;
   initialZoneQuery: string;
+  csrfToken: string;
 };
 
 /**
@@ -30,6 +33,7 @@ export function CustomiseForm({
   initialValues,
   initialErrors,
   initialZoneQuery,
+  csrfToken,
 }: CustomiseFormProps) {
   const [values, setValues] = useState(initialValues);
   const [errors, setErrors] = useState(initialErrors);
@@ -56,13 +60,16 @@ export function CustomiseForm({
     const nextErrors = validateCustomise(values);
     if (hasErrors(nextErrors)) {
       event.preventDefault(); // Stop the post so the page does not reload
-      setErrors(nextErrors);
+      // Render the error summary now, then move focus to it so screen readers announce it
+      flushSync(() => setErrors(nextErrors));
+      document.getElementById("error-summary")?.focus();
     }
     // Otherwise the browser submits normally and the server saves
   }
 
   return (
     <form method="post" action="/customise" noValidate onSubmit={onSubmit}>
+      <CsrfField token={csrfToken} />
       <ErrorSummary errors={errors} />
 
       {/*

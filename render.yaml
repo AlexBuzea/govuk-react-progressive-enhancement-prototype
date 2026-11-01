@@ -1,0 +1,15 @@
+# Render Blueprint: tells Render how to build and run this app.
+# Deploy: push to GitHub, then in Render choose New > Blueprint and pick the repository.
+services:
+  - type: web
+    name: parking-permit-prototype
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build # install, then build the island scripts
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SESSION_SECRET
+        generateValue: true # Render makes a random secret for you

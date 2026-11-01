@@ -1,29 +1,36 @@
 import express from "express";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { securityHeaders } from "./middleware/security-headers";
+import { staticFiles } from "./middleware/static-files";
 import { routes } from "./routes";
+import { csrfProtection } from "./session/csrf";
+import { sessionMiddleware } from "./session/session";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const publicDir = path.join(__dirname, "../../public");
-const govukDir = path.join(__dirname, "../../node_modules/govuk-frontend/dist/govuk");
-
-/** Express app: static files first, then the pages in routes.tsx. */
+/**
+ * The Express app. Order matters: each line runs for the request before the next.
+ *
+ *   security headers → static files → form parsing → session → CSRF check → pages
+ */
 export function createApp() {
   const app = express();
+
+  // Hosts like Render put a proxy in front of the app that handles HTTPS. Trusting it
+  // lets Express see the original HTTPS request, which the secure session cookie needs.
+  if (process.env.NODE_ENV === "production") app.set("trust proxy", 1);
+
+  app.use(securityHeaders);
+  app.use(staticFiles);
+
+  // Everything below is per visitor, so it comes after the static files.
 
   // Parse HTML form submissions (application/x-www-form-urlencoded) into req.body
   app.use(express.urlencoded({ extended: false }));
 
-  // GOV.UK Frontend CSS, fonts and images (the CSS expects them under /assets)
-  app.use("/assets", express.static(path.join(govukDir, "assets")));
-  app.get("/govuk-frontend.min.css", (_req, res) => {
-    res.sendFile(path.join(govukDir, "govuk-frontend.min.css"));
-  });
+  app.use(sessionMiddleware());
 
-  // Our own files: styles.css and the island scripts Vite builds into public/islands/
-  app.use(express.static(publicDir));
+  // Refuse form posts that do not carry this visitor's CSRF token
+  app.use(csrfProtection);
 
-  // Pages and form handlers (must come after static files)
+  // Pages and form handlers (src/backend/routes/)
   app.use(routes);
 
   return app;
