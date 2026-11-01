@@ -2,7 +2,7 @@
 # Deploy: push to GitHub, then in Render choose New > Blueprint and pick the repository.
 services:
   - type: web
-    name: parking-permit-prototype
+    name: react-progressive-enhancement-prototype
     runtime: node
     plan: free
     buildCommand: npm install && npm run build # install, then build the island scripts
