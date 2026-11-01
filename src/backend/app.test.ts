@@ -64,6 +64,17 @@ describe("pages", () => {
     assert.match(await response.text(), /Apply for a parking permit/);
   });
 
+  it("shows the help page, linked from the footer of every page, with no React sent", async () => {
+    const help = await new Visitor().get("/help");
+    assert.equal(help.status, 200);
+    const html = await help.text();
+    assert.match(html, /<title>Help and contact/);
+    assert.doesNotMatch(html, /\/islands\//);
+
+    const start = await (await new Visitor().get("/")).text();
+    assert.match(start, /<a class="govuk-footer__link" href="\/help">Help and contact<\/a>/);
+  });
+
   it("returns 404 for an unknown URL", async () => {
     const response = await new Visitor().get("/nope");
     assert.equal(response.status, 404);

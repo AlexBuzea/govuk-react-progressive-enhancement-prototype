@@ -45,7 +45,7 @@ User selects "Save and continue"
   → no errors? save the answers and go to the next page
 ```
 
-Examples: start page, `/details`, `/organisation-details`, `/check`, `/confirmation`. **Copy `/details` for a new form.**
+Examples: start page, `/help`, `/details`, `/organisation-details`, `/check`, `/confirmation`. **Copy `/help` for a simple page and `/details` for a form.**
 
 ### 2. Pages with an island
 
@@ -97,7 +97,15 @@ Search for `>>>` in the code to find where each kind of addition goes.
 
 ## How to add a server-only page
 
-1. Create the component in `frontend/pages/<name>/`. Copy `pages/details/` if it has a form.
+**A page with no form** is three small steps. `/help` is the example: [pages/help/HelpPage.tsx](src/frontend/pages/help/HelpPage.tsx) (the component, just a `<title>` and some HTML), [routes/help.tsx](src/backend/routes/help.tsx) (one `render(res, <HelpPage />)`), and one line in [routes/index.ts](src/backend/routes/index.ts):
+
+```ts
+routes.get("/help", showHelpPage); // <HelpPage>
+```
+
+**A page with a form** (part of a journey):
+
+1. Create the component in `frontend/pages/<name>/`. Copy `pages/details/`.
 2. Add its handlers in `backend/routes/permit-application/<name>.tsx`. Copy `details.tsx`.
 3. Add one line for it in `backend/routes/permit-application/index.ts`.
 

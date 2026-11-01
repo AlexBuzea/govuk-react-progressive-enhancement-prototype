@@ -19,6 +19,11 @@ export function Footer() {
                   Home
                 </a>
               </li>
+              <li className="govuk-footer__inline-list-item">
+                <a className="govuk-footer__link" href="/help">
+                  Help and contact
+                </a>
+              </li>
             </ul>
             <div className="govuk-footer__meta-custom">
               Prototype — not a real government service

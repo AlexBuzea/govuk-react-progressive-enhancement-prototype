@@ -11,6 +11,7 @@ import { ConfirmationPage } from "./confirmation/ConfirmationPage";
 import { CustomisePage } from "./customise/CustomisePage";
 import { DetailsPage } from "./details/DetailsPage";
 import { HomePage } from "./home/HomePage";
+import { HelpPage } from "./help/HelpPage";
 import { NotFoundPage } from "./not-found/NotFoundPage";
 import { OrganisationDetailsPage } from "./organisation-details/OrganisationDetailsPage";
 import { SessionExpiredPage } from "./session-expired/SessionExpiredPage";
@@ -85,6 +86,7 @@ const pages: Record<string, ReactNode> = {
     />
   ),
   "confirmation": <ConfirmationPage />,
+  "help and contact": <HelpPage />,
   "page not found": <NotFoundPage />,
   "session ended": <SessionExpiredPage />,
 };

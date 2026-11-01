@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { showNotFoundPage } from "./not-found";
+import { showHelpPage } from "./help";
 import { permitApplicationRoutes } from "./permit-application";
 import { showStartPage } from "./start";
 
@@ -17,6 +18,7 @@ import { showStartPage } from "./start";
 export const routes = Router();
 
 routes.get("/", showStartPage); // <HomePage>
+routes.get("/help", showHelpPage); // <HelpPage>
 
 routes.use(permitApplicationRoutes); // /apply → /details → /customise → /check → /confirmation
 
