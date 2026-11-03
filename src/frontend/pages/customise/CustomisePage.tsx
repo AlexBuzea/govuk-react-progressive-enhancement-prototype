@@ -1,6 +1,6 @@
 import { detailsPageFor } from "../../../shared/journey";
 import { SERVICE_NAME, type CustomiseData, type CustomiseErrors } from "../../../shared/types";
-import { BackLink } from "../../components/BackLink";
+import { GovukBackLink } from "../../components/GovukBackLink";
 import { CustomiseForm } from "./CustomiseForm";
 
 type CustomisePageProps = {
@@ -30,7 +30,7 @@ export function CustomisePage({
   return (
     <>
       <title>{`${Object.keys(errors).length > 0 ? "Error: " : ""}Permit options — ${SERVICE_NAME} — GOV.UK`}</title>
-      <BackLink href={detailsPageFor(permitType)} />
+      <GovukBackLink href={detailsPageFor(permitType)} />
       <h1 className="govuk-heading-l">Permit options</h1>
       <p className="govuk-body">
         Choose duration, extras and your parking zone. With JavaScript on, the

@@ -1,11 +1,11 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { flushSync } from "react-dom";
 import type { CustomiseData, CustomiseErrors } from "../../../shared/types";
-import { Button } from "../../components/Button";
+import { GovukButton } from "../../components/GovukButton";
 import { CsrfField } from "../../components/CsrfField";
-import { ErrorSummary } from "../../components/ErrorSummary";
-import { Radios } from "../../components/Radios";
-import { TextInput } from "../../components/TextInput";
+import { GovukErrorSummary } from "../../components/GovukErrorSummary";
+import { GovukRadios } from "../../components/GovukRadios";
+import { GovukInput } from "../../components/GovukInput";
 import {
   calculatePrice,
   DURATIONS,
@@ -70,14 +70,14 @@ export function CustomiseForm({
   return (
     <form method="post" action="/customise" noValidate onSubmit={onSubmit}>
       <CsrfField token={csrfToken} />
-      <ErrorSummary errors={errors} />
+      <GovukErrorSummary errors={errors} />
 
       {/*
         The radio buttons below are controlled by React (value + onChange).
         With JS: choosing an option updates the price and clears that field's error at once.
         Without JS: they are plain radio buttons and nothing changes until the form is posted.
       */}
-      <Radios
+      <GovukRadios
         name="duration"
         legend="How long do you need the permit?"
         options={DURATIONS.map((d) => ({ value: d.value, label: `${d.label} (£${d.price})` }))}
@@ -86,7 +86,7 @@ export function CustomiseForm({
         error={errors.duration}
       />
 
-      <Radios
+      <GovukRadios
         name="visitorBay"
         legend={`Do you need a visitor bay? (+£${VISITOR_BAY_PRICE})`}
         options={YES_NO}
@@ -104,7 +104,7 @@ export function CustomiseForm({
         The hint text explains it is only needed for a visitor bay.
         The field stays in the form when hidden, so the server still receives it.
       */}
-      <TextInput
+      <GovukInput
         name="visitorEndDate"
         label="Visitor bay end date"
         hint="Only needed if you need a visitor bay. For example, 31/12/2026"
@@ -147,7 +147,7 @@ export function CustomiseForm({
         Without JS: the user types, then selects the "Filter zones" button, which
         reloads the page with ?q=... so the server can filter the list.
       */}
-      <TextInput
+      <GovukInput
         name="q"
         label="Filter zones"
         hint={
@@ -164,13 +164,13 @@ export function CustomiseForm({
       {!jsEnabled ? (
         // Only shown without JS, because with JS the list already filters as you type.
         // formMethod="get" sends this one button as a GET (?q=...) instead of the form's POST.
-        <Button type="submit" className="govuk-button--secondary" formMethod="get" formAction="/customise">
+        <GovukButton type="submit" className="govuk-button--secondary" formMethod="get" formAction="/customise">
           Filter zones
-        </Button>
+        </GovukButton>
       ) : null}
 
       {/* visibleZones is the full list, or the list narrowed by the filter above */}
-      <Radios
+      <GovukRadios
         name="zoneId"
         legend="Parking zone"
         options={visibleZones.map((zone) => ({
@@ -185,7 +185,7 @@ export function CustomiseForm({
         <p className="govuk-body">No zones match your filter.</p>
       ) : null}
 
-      <Button type="submit">Continue</Button>
+      <GovukButton type="submit">Continue</GovukButton>
     </form>
   );
 }

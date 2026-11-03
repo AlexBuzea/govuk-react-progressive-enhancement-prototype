@@ -1,4 +1,4 @@
-type SummaryRowProps = {
+type GovukSummaryListRowProps = {
   label: string;
   value: string;
   /** Page the user goes to when they click "Change". */
@@ -10,7 +10,7 @@ type SummaryRowProps = {
  * Wrap rows in <dl className="govuk-summary-list">.
  * https://design-system.service.gov.uk/components/summary-list/
  */
-export function SummaryRow({ label, value, changeHref }: SummaryRowProps) {
+export function GovukSummaryListRow({ label, value, changeHref }: GovukSummaryListRowProps) {
   return (
     <div className="govuk-summary-list__row">
       <dt className="govuk-summary-list__key">{label}</dt>

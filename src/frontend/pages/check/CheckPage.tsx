@@ -6,10 +6,10 @@ import {
   type DetailsData,
   type OrganisationData,
 } from "../../../shared/types";
-import { BackLink } from "../../components/BackLink";
-import { Button } from "../../components/Button";
+import { GovukBackLink } from "../../components/GovukBackLink";
+import { GovukButton } from "../../components/GovukButton";
 import { CsrfField } from "../../components/CsrfField";
-import { SummaryRow } from "../../components/SummaryRow";
+import { GovukSummaryListRow } from "../../components/GovukSummaryListRow";
 import { PERMIT_TYPES } from "../apply/options";
 import {
   calculatePrice,
@@ -55,7 +55,7 @@ export function CheckPage({
   return (
     <>
       <title>{`Check your answers — ${SERVICE_NAME} — GOV.UK`}</title>
-      <BackLink href="/customise" />
+      <GovukBackLink href="/customise" />
       <h1 className="govuk-heading-l">Check your answers</h1>
 
       {!hasAnswers ? (
@@ -69,29 +69,29 @@ export function CheckPage({
       ) : (
         <>
           <dl className="govuk-summary-list">
-            <SummaryRow
+            <GovukSummaryListRow
               label="Vehicle registration"
               value={application.vehicleReg || "Not provided"}
               changeHref="/apply"
             />
-            <SummaryRow
+            <GovukSummaryListRow
               label="Permit type"
               value={labelFor(PERMIT_TYPES, application.permitType)}
               changeHref="/apply"
             />
             {isCommercial ? (
               <>
-                <SummaryRow
+                <GovukSummaryListRow
                   label="Organisation name"
                   value={organisation.organisationName || "Not provided"}
                   changeHref={detailsHref}
                 />
-                <SummaryRow
+                <GovukSummaryListRow
                   label="Company number"
                   value={organisation.companyNumber || "Not provided"}
                   changeHref={detailsHref}
                 />
-                <SummaryRow
+                <GovukSummaryListRow
                   label="Contact email"
                   value={organisation.contactEmail || "Not provided"}
                   changeHref={detailsHref}
@@ -99,41 +99,41 @@ export function CheckPage({
               </>
             ) : (
               <>
-                <SummaryRow
+                <GovukSummaryListRow
                   label="Full name"
                   value={details.fullName || "Not provided"}
                   changeHref={detailsHref}
                 />
-                <SummaryRow
+                <GovukSummaryListRow
                   label="Address"
                   value={address || "Not provided"}
                   changeHref={detailsHref}
                 />
               </>
             )}
-            <SummaryRow
+            <GovukSummaryListRow
               label="Duration"
               value={labelFor(DURATIONS, customise.duration)}
               changeHref="/customise"
             />
-            <SummaryRow
+            <GovukSummaryListRow
               label="Visitor bay"
               value={labelFor(YES_NO, customise.visitorBay)}
               changeHref="/customise"
             />
             {customise.visitorBay === "yes" ? (
-              <SummaryRow
+              <GovukSummaryListRow
                 label="Visitor end date"
                 value={customise.visitorEndDate || "Not provided"}
                 changeHref="/customise"
               />
             ) : null}
-            <SummaryRow
+            <GovukSummaryListRow
               label="Parking zone"
               value={zone ? `${zone.name} (${zone.id}) — ${zone.area}` : "Not provided"}
               changeHref="/customise"
             />
-            <SummaryRow
+            <GovukSummaryListRow
               label="Estimated total"
               value={price == null ? "Not provided" : formatPrice(price)}
               changeHref="/customise"
@@ -142,7 +142,7 @@ export function CheckPage({
 
           <form method="post" action="/check">
             <CsrfField token={csrfToken} />
-            <Button type="submit">Accept and send</Button>
+            <GovukButton type="submit">Accept and send</GovukButton>
           </form>
         </>
       )}

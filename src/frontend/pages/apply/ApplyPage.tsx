@@ -1,9 +1,9 @@
 import { SERVICE_NAME, type ApplicationData } from "../../../shared/types";
-import { BackLink } from "../../components/BackLink";
-import { Button } from "../../components/Button";
+import { GovukBackLink } from "../../components/GovukBackLink";
+import { GovukButton } from "../../components/GovukButton";
 import { CsrfField } from "../../components/CsrfField";
-import { Radios } from "../../components/Radios";
-import { TextInput } from "../../components/TextInput";
+import { GovukRadios } from "../../components/GovukRadios";
+import { GovukInput } from "../../components/GovukInput";
 import { Counter } from "./Counter";
 import { PERMIT_TYPES } from "./options";
 
@@ -23,7 +23,7 @@ export function ApplyPage({ application, counter, csrfToken }: ApplyPageProps) {
   return (
     <>
       <title>{`Your application — ${SERVICE_NAME} — GOV.UK`}</title>
-      <BackLink href="/" />
+      <GovukBackLink href="/" />
       <h1 className="govuk-heading-l">Your application</h1>
       <p className="govuk-body">
         Enter your vehicle and choose a permit type. This form works with JavaScript turned off.
@@ -31,7 +31,7 @@ export function ApplyPage({ application, counter, csrfToken }: ApplyPageProps) {
 
       <form method="post" action="/apply" noValidate>
         <CsrfField token={csrfToken} />
-        <TextInput
+        <GovukInput
           name="vehicleReg"
           label="Vehicle registration number"
           hint="For example, AB12 CDE"
@@ -39,14 +39,14 @@ export function ApplyPage({ application, counter, csrfToken }: ApplyPageProps) {
           defaultValue={application.vehicleReg}
         />
 
-        <Radios
+        <GovukRadios
           name="permitType"
           legend="Permit type"
           options={PERMIT_TYPES}
           value={application.permitType}
         />
 
-        <Button type="submit">Continue</Button>
+        <GovukButton type="submit">Continue</GovukButton>
       </form>
 
       <hr className="govuk-section-break govuk-section-break--l govuk-section-break--visible" />

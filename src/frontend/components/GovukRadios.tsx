@@ -3,7 +3,7 @@ type Option = {
   label: string;
 };
 
-type RadiosProps = {
+type GovukRadiosProps = {
   name: string;
   legend: string;
   options: Option[];
@@ -17,7 +17,7 @@ type RadiosProps = {
 };
 
 /** GOV.UK radio buttons: https://design-system.service.gov.uk/components/radios/ */
-export function Radios({ name, legend, options, value, error, onChange }: RadiosProps) {
+export function GovukRadios({ name, legend, options, value, error, onChange }: GovukRadiosProps) {
   const errorId = `${name}-error`;
 
   return (

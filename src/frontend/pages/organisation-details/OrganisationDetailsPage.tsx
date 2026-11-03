@@ -3,11 +3,11 @@ import {
   type OrganisationData,
   type OrganisationErrors,
 } from "../../../shared/types";
-import { BackLink } from "../../components/BackLink";
-import { Button } from "../../components/Button";
+import { GovukBackLink } from "../../components/GovukBackLink";
+import { GovukButton } from "../../components/GovukButton";
 import { CsrfField } from "../../components/CsrfField";
-import { ErrorSummary } from "../../components/ErrorSummary";
-import { TextInput } from "../../components/TextInput";
+import { GovukErrorSummary } from "../../components/GovukErrorSummary";
+import { GovukInput } from "../../components/GovukInput";
 
 type OrganisationDetailsPageProps = {
   organisation: OrganisationData;
@@ -29,15 +29,15 @@ export function OrganisationDetailsPage({
   return (
     <>
       <title>{`${hasErrors ? "Error: " : ""}Your organisation — ${SERVICE_NAME} — GOV.UK`}</title>
-      <BackLink href="/apply" />
+      <GovukBackLink href="/apply" />
 
       <form method="post" action="/organisation-details" noValidate>
         <CsrfField token={csrfToken} />
-        <ErrorSummary errors={errors} />
+        <GovukErrorSummary errors={errors} />
 
         <h1 className="govuk-heading-l">Your organisation</h1>
 
-        <TextInput
+        <GovukInput
           name="organisationName"
           label="Organisation name"
           autoComplete="organization"
@@ -45,7 +45,7 @@ export function OrganisationDetailsPage({
           error={errors.organisationName}
         />
 
-        <TextInput
+        <GovukInput
           name="companyNumber"
           label="Company number"
           hint="8 characters, for example 01234567"
@@ -55,7 +55,7 @@ export function OrganisationDetailsPage({
           error={errors.companyNumber}
         />
 
-        <TextInput
+        <GovukInput
           name="contactEmail"
           label="Contact email address (optional)"
           type="email"
@@ -65,7 +65,7 @@ export function OrganisationDetailsPage({
           error={errors.contactEmail}
         />
 
-        <Button type="submit">Save and continue</Button>
+        <GovukButton type="submit">Save and continue</GovukButton>
       </form>
     </>
   );

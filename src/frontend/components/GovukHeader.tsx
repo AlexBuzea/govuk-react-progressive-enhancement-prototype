@@ -1,11 +1,11 @@
 import { GovukLogo } from "./GovukLogo";
 
-type HeaderProps = {
+type GovukHeaderProps = {
   serviceName: string;
 };
 
 /** GOV.UK Frontend v5+ header + service navigation (CSS only — no Design System JS). */
-export function Header({ serviceName }: HeaderProps) {
+export function GovukHeader({ serviceName }: GovukHeaderProps) {
   return (
     <header className="govuk-template__header">
       <div className="govuk-header">

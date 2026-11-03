@@ -1,6 +1,6 @@
 import type { InputHTMLAttributes } from "react";
 
-type TextInputProps = InputHTMLAttributes<HTMLInputElement> & {
+type GovukInputProps = InputHTMLAttributes<HTMLInputElement> & {
   /** Form field name. Also used as the id, so error summary links can jump here. */
   name: string;
   label: string;
@@ -16,7 +16,7 @@ type TextInputProps = InputHTMLAttributes<HTMLInputElement> & {
  * Any other <input> attribute can be passed through, e.g. defaultValue for a
  * plain HTML form, or value + onChange inside an island.
  */
-export function TextInput({
+export function GovukInput({
   name,
   label,
   hint,
@@ -24,7 +24,7 @@ export function TextInput({
   hidden,
   className = "",
   ...inputProps
-}: TextInputProps) {
+}: GovukInputProps) {
   const hintId = `${name}-hint`;
   const errorId = `${name}-error`;
 

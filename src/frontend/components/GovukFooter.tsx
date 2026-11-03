@@ -1,6 +1,6 @@
 import { GovukLogo } from "./GovukLogo";
 
-export function Footer() {
+export function GovukFooter() {
   return (
     <footer className="govuk-footer">
       <div className="govuk-width-container">

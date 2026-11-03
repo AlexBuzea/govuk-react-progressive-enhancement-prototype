@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { SERVICE_NAME } from "../shared/types";
-import { Footer } from "./components/Footer";
-import { Header } from "./components/Header";
+import { GovukFooter } from "./components/GovukFooter";
+import { GovukHeader } from "./components/GovukHeader";
 
 type DocumentProps = {
   children: ReactNode;
@@ -41,7 +41,7 @@ export function Document({ children }: DocumentProps) {
           Skip to main content
         </a>
 
-        <Header serviceName={SERVICE_NAME} />
+        <GovukHeader serviceName={SERVICE_NAME} />
 
         <div className="govuk-width-container">
           <main className="govuk-main-wrapper" id="main-content">
@@ -51,7 +51,7 @@ export function Document({ children }: DocumentProps) {
           </main>
         </div>
 
-        <Footer />
+        <GovukFooter />
 
         <script type="module" src="/govuk-init.js" />
       </body>

@@ -1,4 +1,4 @@
-type ErrorSummaryProps = {
+type GovukErrorSummaryProps = {
   /** Field name → message. Each link jumps to the element with that id. */
   errors: Record<string, string | undefined>;
 };
@@ -12,7 +12,7 @@ type ErrorSummaryProps = {
  * - Errors found in the browser by an island: the island calls
  *   document.getElementById("error-summary")?.focus() itself (see CustomiseForm).
  */
-export function ErrorSummary({ errors }: ErrorSummaryProps) {
+export function GovukErrorSummary({ errors }: GovukErrorSummaryProps) {
   const messages = Object.entries(errors).filter(([, message]) => message);
   if (messages.length === 0) return null;
 

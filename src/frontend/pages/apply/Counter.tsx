@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { Button } from "../../components/Button";
+import { GovukButton } from "../../components/GovukButton";
 import { CsrfField } from "../../components/CsrfField";
 
 type CounterProps = {
@@ -45,7 +45,7 @@ export function Counter({ initialCount, csrfToken }: CounterProps) {
       </p>
       <form method="post" action="/apply/increment" onSubmit={onSubmit}>
         <CsrfField token={csrfToken} />
-        <Button type="submit">Increment counter</Button>
+        <GovukButton type="submit">Increment counter</GovukButton>
       </form>
     </div>
   );

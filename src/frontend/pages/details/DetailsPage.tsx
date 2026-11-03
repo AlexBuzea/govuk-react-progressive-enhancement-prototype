@@ -1,9 +1,9 @@
 import { SERVICE_NAME, type DetailsData, type DetailsErrors } from "../../../shared/types";
-import { BackLink } from "../../components/BackLink";
-import { Button } from "../../components/Button";
+import { GovukBackLink } from "../../components/GovukBackLink";
+import { GovukButton } from "../../components/GovukButton";
 import { CsrfField } from "../../components/CsrfField";
-import { ErrorSummary } from "../../components/ErrorSummary";
-import { TextInput } from "../../components/TextInput";
+import { GovukErrorSummary } from "../../components/GovukErrorSummary";
+import { GovukInput } from "../../components/GovukInput";
 
 type DetailsPageProps = {
   details: DetailsData;
@@ -27,16 +27,16 @@ export function DetailsPage({ details, errors, csrfToken }: DetailsPageProps) {
     <>
       {/* GOV.UK pattern: start the title with "Error:" so screen reader users hear it first */}
       <title>{`${hasErrors ? "Error: " : ""}Your name and address — ${SERVICE_NAME} — GOV.UK`}</title>
-      <BackLink href="/apply" />
+      <GovukBackLink href="/apply" />
 
       <form method="post" action="/details" noValidate>
         <CsrfField token={csrfToken} />
-        <ErrorSummary errors={errors} />
+        <GovukErrorSummary errors={errors} />
 
         <h1 className="govuk-heading-l">Your name and address</h1>
 
         {/* defaultValue: the browser keeps track of what is typed, React only sets the starting value */}
-        <TextInput
+        <GovukInput
           name="fullName"
           label="Full name"
           autoComplete="name"
@@ -44,7 +44,7 @@ export function DetailsPage({ details, errors, csrfToken }: DetailsPageProps) {
           error={errors.fullName}
         />
 
-        <TextInput
+        <GovukInput
           name="addressLine1"
           label="Address line 1"
           autoComplete="address-line1"
@@ -52,14 +52,14 @@ export function DetailsPage({ details, errors, csrfToken }: DetailsPageProps) {
           error={errors.addressLine1}
         />
 
-        <TextInput
+        <GovukInput
           name="addressLine2"
           label="Address line 2 (optional)"
           autoComplete="address-line2"
           defaultValue={details.addressLine2}
         />
 
-        <TextInput
+        <GovukInput
           name="town"
           label="Town or city"
           autoComplete="address-level2"
@@ -68,7 +68,7 @@ export function DetailsPage({ details, errors, csrfToken }: DetailsPageProps) {
           error={errors.town}
         />
 
-        <TextInput
+        <GovukInput
           name="postcode"
           label="Postcode"
           autoComplete="postal-code"
@@ -77,7 +77,7 @@ export function DetailsPage({ details, errors, csrfToken }: DetailsPageProps) {
           error={errors.postcode}
         />
 
-        <Button type="submit">Save and continue</Button>
+        <GovukButton type="submit">Save and continue</GovukButton>
       </form>
     </>
   );

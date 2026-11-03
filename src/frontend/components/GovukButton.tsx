@@ -1,15 +1,15 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
-type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+type GovukButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   children: ReactNode;
 };
 
-export function Button({
+export function GovukButton({
   children,
   className = "",
   type = "submit",
   ...rest
-}: ButtonProps) {
+}: GovukButtonProps) {
   const classes = ["govuk-button", className].filter(Boolean).join(" ");
 
   return (

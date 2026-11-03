@@ -1,9 +1,9 @@
-type BackLinkProps = {
+type GovukBackLinkProps = {
   href: string;
   children?: string;
 };
 
-export function BackLink({ href, children = "Back" }: BackLinkProps) {
+export function GovukBackLink({ href, children = "Back" }: GovukBackLinkProps) {
   return (
     <a href={href} className="govuk-back-link">
       {children}

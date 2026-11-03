@@ -80,7 +80,7 @@ src/
     utils/render.tsx  Turns a page component into HTML
   frontend/
     Document.tsx      The <html> shell: head, header, footer
-    components/       GOV.UK components (TextInput, Radios, ErrorSummary...)
+    components/       GOV.UK components (GovukInput, GovukRadios, GovukErrorSummary...)
     pages/            One folder per page
     islands/          Browser scripts, one per island
   shared/             Types and rules used by both server and browser
