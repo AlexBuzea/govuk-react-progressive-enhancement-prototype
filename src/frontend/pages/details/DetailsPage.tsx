@@ -12,7 +12,7 @@ type DetailsPageProps = {
 };
 
 /**
- * Server-only page: no island and no JavaScript sent to the browser.
+ * Server-only page: no island and no React sent to the browser.
  * It is a normal React component that the server turns into HTML.
  *
  * 1. The user selects "Save and continue" and the browser POSTs to /details.
