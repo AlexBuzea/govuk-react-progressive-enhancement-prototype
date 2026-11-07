@@ -2,6 +2,8 @@
 
 > **This is a prototype.** It shows how a GOV.UK service could be built with React instead of Nunjucks while still following progressive enhancement. It is not a production service: answers are kept in server memory and lost on restart, and nothing is really submitted.
 
+**Live demo:** https://react-progressive-enhancement-prototype.onrender.com/ (the free hosting plan sleeps when idle, so the first load can take up to a minute).
+
 Built with Node, Express, TypeScript and React. No meta-framework (no Next.js).
 
 The idea: **every page is a working HTML page first. React only runs in the browser where it makes a page better.**
