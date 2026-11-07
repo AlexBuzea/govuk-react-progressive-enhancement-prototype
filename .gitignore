@@ -1,6 +1,8 @@
 node_modules/
 public/islands/
 dist/
+test-results/
+playwright-report/
 .DS_Store
 *.log
 .env
