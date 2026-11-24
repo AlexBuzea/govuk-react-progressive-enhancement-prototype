@@ -22,6 +22,8 @@ type CustomiseFormProps = {
   initialErrors: CustomiseErrors;
   initialZoneQuery: string;
   csrfToken: string;
+  /** Browser only: what the user answered before React started (see islands/customise.tsx). */
+  answersBeforeHydration?: Record<string, string | string[]>;
 };
 
 /**
@@ -34,6 +36,7 @@ export function CustomiseForm({
   initialErrors,
   initialZoneQuery,
   csrfToken,
+  answersBeforeHydration,
 }: CustomiseFormProps) {
   const [values, setValues] = useState(initialValues);
   const [errors, setErrors] = useState(initialErrors);
@@ -43,7 +46,18 @@ export function CustomiseForm({
   // false on the server and during hydration (so both render the same HTML);
   // true once React is running in the browser. Without JS it stays false.
   const [jsEnabled, setJsEnabled] = useState(false);
-  useEffect(() => setJsEnabled(true), []);
+  useEffect(() => {
+    setJsEnabled(true);
+
+    // Put back anything the user answered before React started. This runs after
+    // hydration, not as the starting state, because the first render in the
+    // browser must match the server's HTML.
+    if (answersBeforeHydration) {
+      setValues((current) => ({ ...current, ...answersBeforeHydration }));
+      const zoneFilter = answersBeforeHydration.q; // a single text field, so a string
+      if (typeof zoneFilter === "string") setZoneQuery(zoneFilter);
+    }
+  }, []);
 
   const price = calculatePrice(values.duration, values.visitorBay);
   const visibleZones = filterZones(zoneQuery);

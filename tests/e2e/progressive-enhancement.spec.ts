@@ -5,7 +5,9 @@ import { expect, test } from "@playwright/test";
  *
  * 1. JavaScript off: the whole journey can be completed.
  * 2. JavaScript on, but the island scripts fail: the page still works as a plain form.
- * 3. JavaScript on and working: the islands improve the page (so 1 and 2 are
+ * 3. JavaScript on, but the island scripts load slowly: answers given before
+ *    React starts are kept, and the error summary still gets focus.
+ * 4. JavaScript on and working: the islands improve the page (so 1, 2 and 3 are
  *    really testing a fallback, not the only version).
  *
  * Each test starts with a new browser, so no answers carry over between tests.
@@ -126,6 +128,60 @@ test.describe("JavaScript on, but the island scripts fail", () => {
     await page.getByLabel("Riverside North").check();
     await page.getByRole("button", { name: "Continue" }).click();
     await expect(page.getByRole("heading", { name: "Check your answers" })).toBeVisible();
+  });
+});
+
+test.describe("JavaScript on, but the island scripts load slowly", () => {
+  // On a slow connection the page shows, and can be used, before the island script has
+  // run. These tests hold the island scripts back to act in that gap, like a user would.
+
+  test("answers given before the island starts are kept once it starts", async ({ page }) => {
+    // Hold every island script request until releaseIslands() is called
+    let releaseIslands = () => {};
+    const islandsReleased = new Promise<void>((resolve) => (releaseIslands = resolve));
+    await page.route("**/islands/**", async (route) => {
+      await islandsReleased;
+      await route.continue();
+    });
+
+    // "commit": don't wait for the page to finish loading, because the held scripts stop that
+    await page.goto("/customise", { waitUntil: "commit" });
+
+    // Answer while React has not started (the no-JS "Filter zones" button is still there)
+    await expect(page.getByRole("button", { name: "Filter zones" })).toBeVisible();
+    await page.getByLabel("12 months").check();
+    await page.getByLabel("Yes", { exact: true }).check();
+    await page.getByLabel("Visitor bay end date").fill("31/12/2026");
+
+    // Let the island load, and wait until React has started (the button disappears)
+    releaseIslands();
+    await expect(page.getByRole("button", { name: "Filter zones" })).toHaveCount(0);
+
+    // The answers are still there, and React knows about them: the price includes both
+    await expect(page.getByLabel("12 months")).toBeChecked();
+    await expect(page.getByLabel("Yes", { exact: true })).toBeChecked();
+    await expect(page.getByLabel("Visitor bay end date")).toHaveValue("31/12/2026");
+    await expect(page.locator(".app-price-box")).toContainText("£295");
+  });
+
+  test("a server error before the island starts keeps the answers and focuses the error summary", async ({ page }) => {
+    // Never answer the island script requests, so they stay loading for the whole test
+    await page.route("**/islands/**", () => {});
+
+    await page.goto("/customise", { waitUntil: "commit" });
+    await expect(page.getByRole("button", { name: "Filter zones" })).toBeVisible();
+
+    // Leave the zone out, so the server sends the page back with an error
+    await page.getByLabel("6 months").check();
+    await page.getByLabel("No", { exact: true }).check();
+    await page.getByRole("button", { name: "Continue" }).click();
+
+    // The error summary gets focus (GOV.UK Frontend's JavaScript does that, not React),
+    // so screen readers announce it even though the island still has not loaded
+    await expect(page.getByRole("link", { name: "Select a parking zone" })).toBeVisible();
+    await expect(page.locator("#error-summary")).toBeFocused();
+    await expect(page.getByLabel("6 months")).toBeChecked();
+    await expect(page.getByLabel("No", { exact: true })).toBeChecked();
   });
 });
 

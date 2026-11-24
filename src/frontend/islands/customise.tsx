@@ -1,5 +1,6 @@
 import { hydrateRoot } from "react-dom/client";
 import { CustomiseForm } from "../pages/customise/CustomiseForm";
+import { readFormAnswers } from "../read-form-answers";
 
 /**
  * Browser entry for the permit options form on /customise.
@@ -12,5 +13,10 @@ import { CustomiseForm } from "../pages/customise/CustomiseForm";
 const root = document.getElementById("customise");
 if (root) {
   const props = JSON.parse(root.dataset.props ?? "{}");
-  hydrateRoot(root, <CustomiseForm {...props} />);
+
+  // Read the form before hydrating, while it still holds anything the user
+  // answered before this script loaded (hydrating would reset it)
+  const answersBeforeHydration = readFormAnswers(root);
+
+  hydrateRoot(root, <CustomiseForm {...props} answersBeforeHydration={answersBeforeHydration} />);
 }

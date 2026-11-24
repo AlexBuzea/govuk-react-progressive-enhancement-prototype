@@ -33,6 +33,12 @@ export function Document({ children }: DocumentProps) {
         <link rel="apple-touch-icon" href="/assets/images/govuk-icon-180.png" />
         <link rel="stylesheet" href="/govuk-frontend.min.css" />
         <link rel="stylesheet" href="/styles.css" />
+        {/*
+          Module scripts run in page order, after the HTML has been read. This one
+          comes before the island scripts, so a slow island can't delay GOV.UK
+          behaviour such as focusing the error summary.
+        */}
+        <script type="module" src="/govuk-init.js" />
       </head>
       <body className="govuk-template__body">
         <script src="/js-enabled.js" />
@@ -52,8 +58,6 @@ export function Document({ children }: DocumentProps) {
         </div>
 
         <GovukFooter />
-
-        <script type="module" src="/govuk-init.js" />
       </body>
     </html>
   );
