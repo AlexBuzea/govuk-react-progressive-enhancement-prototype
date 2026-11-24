@@ -143,6 +143,15 @@ if (root) {
 
 Vite builds it to `public/islands/my-island.js` automatically.
 
+### If the island has form fields
+
+On a slow connection people can answer before the island loads, and hydrating would reset their answers. To keep them, copy what [islands/customise.tsx](src/frontend/islands/customise.tsx) and [CustomiseForm.tsx](src/frontend/pages/customise/CustomiseForm.tsx) do:
+
+1. In the island file, call `readFormAnswers(root)` before `hydrateRoot` and pass the result as `answersBeforeHydration`.
+2. In the component, apply `answersBeforeHydration` in a `useEffect`, not as the starting state.
+
+Copy the "answers given before the island starts" test in `tests/e2e/progressive-enhancement.spec.ts` for the new island.
+
 ---
 
 ## Deploy to Render
